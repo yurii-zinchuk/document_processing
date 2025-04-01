@@ -89,7 +89,7 @@ class ImagesRepositoryImpl @Inject constructor(
             canvas.drawBitmap(bitmap, 0f, 0f, null)
             pdfFile.finishPage(page)
 
-            val destinationDirectory = File(context.filesDir, uuid.toString())
+            val destinationDirectory = File(context.filesDir, "$PDF_DIRECTORY/${uuid}")
             val pdfDestinationFile = File(
                 destinationDirectory,
                 PDF_FILE_NAME,
@@ -149,6 +149,7 @@ class ImagesRepositoryImpl @Inject constructor(
     private companion object {
         private const val FILE_NAME_TEMPLATE = "IMAGE_FILE_%s"
         private const val PDF_FILE_NAME = "PDF_PHOTOS.pdf"
+        private const val PDF_DIRECTORY = "pdf"
         private const val IMAGE_EXT = ".png"
         private const val IMAGE_MIME_TYPE = "image/"
         private const val FILE_NAME_SEPARATOR = "_"
