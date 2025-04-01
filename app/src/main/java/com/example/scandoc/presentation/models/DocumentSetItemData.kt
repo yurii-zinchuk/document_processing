@@ -1,0 +1,13 @@
+package com.example.scandoc.presentation.models
+
+import android.graphics.Bitmap
+import java.io.File
+import java.util.UUID
+
+data class DocumentSetItemData(
+    val uuid: UUID,
+    val name: String,
+    val previewImage: File?,
+    val numberOfPages: Int,
+    val createdAt: String,
+)
