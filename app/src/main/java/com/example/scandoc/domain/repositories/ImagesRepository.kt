@@ -12,6 +12,4 @@ interface ImagesRepository {
 
     suspend fun deleteImages(uuid: UUID)
 
-    suspend fun createPDF(uuid: UUID)
-
 }

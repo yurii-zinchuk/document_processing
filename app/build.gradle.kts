@@ -51,6 +51,13 @@ kapt {
 }
 dependencies {
 
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.coroutines.core)
+
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.network)

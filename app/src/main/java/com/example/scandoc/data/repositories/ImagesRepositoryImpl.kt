@@ -1,10 +1,9 @@
 package com.example.scandoc.data.repositories
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import com.example.scandoc.data.storage.InternalStorage
 import com.example.scandoc.domain.repositories.ImagesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -13,6 +12,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 class ImagesRepositoryImpl @Inject constructor(
+    private val internalStorage: InternalStorage,
     @ApplicationContext private val context: Context,
 ) : ImagesRepository {
     override suspend fun saveImages(sourceURIs: List<Uri>, uuid: UUID): Boolean {
@@ -27,7 +27,7 @@ class ImagesRepositoryImpl @Inject constructor(
         imageURIs.forEachIndexed { idx, imageURI ->
             val destinationFile = File(
                 destinationDirectory,
-                FILE_NAME_TEMPLATE.format(idx.inc()) + IMAGE_EXT
+                "${idx.inc()}.$IMAGE_EXT"
             )
             context
                 .contentResolver
@@ -43,7 +43,6 @@ class ImagesRepositoryImpl @Inject constructor(
 
     override suspend fun getImages(uuid: UUID): List<File> {
         val directory = getInternalImagesDirectory(uuid)
-
         if (!directory.exists() || !directory.isDirectory) return emptyList()
 
         return directory
@@ -52,56 +51,16 @@ class ImagesRepositoryImpl @Inject constructor(
             ?.sortedBy { file ->
                 file
                     .name
-                    .split(FILE_NAME_SEPARATOR)
-                    .lastOrNull()
-                    ?.substringBefore(IMAGE_EXT.first())
-                    ?.toIntOrNull()
+                    .substringBefore(IMAGE_EXT.first())
+                    .toIntOrNull()
             }
             ?: emptyList()
     }
 
     override suspend fun deleteImages(uuid: UUID) {
-        val directory = getInternalImagesDirectory(uuid)
-        if (!directory.exists() || !directory.isDirectory) {
-            return
-        }
-
-        directory.deleteRecursively()
-    }
-
-    override suspend fun createPDF(uuid: UUID) {
-        val imageFiles = getImages(uuid)
-        val pdfFile = PdfDocument()
-
-        imageFiles.forEachIndexed { idx, image ->
-            val bitmap = BitmapFactory.decodeFile(image.absolutePath)
-            val pageInfo = PdfDocument
-                .PageInfo
-                .Builder(
-                    bitmap.width,
-                    bitmap.height,
-                    idx.inc(),
-                ).create()
-
-            val page = pdfFile.startPage(pageInfo)
-            val canvas = page.canvas
-
-            canvas.drawBitmap(bitmap, 0f, 0f, null)
-            pdfFile.finishPage(page)
-
-            val destinationDirectory = File(context.filesDir, "$PDF_DIRECTORY/${uuid}")
-            val pdfDestinationFile = File(
-                destinationDirectory,
-                PDF_FILE_NAME,
-            )
-
-            if (!destinationDirectory.exists()) destinationDirectory.mkdirs()
-
-            FileOutputStream(pdfDestinationFile).use { out ->
-                pdfFile.writeTo(out)
-            }
-        }
-        pdfFile.close()
+        getInternalImagesDirectory(uuid)
+            .takeIf { it.exists() && it.isDirectory }
+            ?.deleteRecursively()
     }
 
     private fun getImageUrisFromDirectory(directory: DocumentFile): List<Uri> {
@@ -138,7 +97,7 @@ class ImagesRepositoryImpl @Inject constructor(
         }
 
     private fun getInternalImagesDirectory(uuid: UUID): File =
-        File(context.filesDir, uuid.toString())
+        File(internalStorage.getDirectory(uuid), IMAGES_DIRECTORY)
 
     private fun DocumentFile.isHidden(): Boolean =
         name?.startsWith(HIDDEN_FILE_SYMBOL) == true
@@ -147,12 +106,9 @@ class ImagesRepositoryImpl @Inject constructor(
         type?.startsWith(IMAGE_MIME_TYPE) == true
 
     private companion object {
-        private const val FILE_NAME_TEMPLATE = "IMAGE_FILE_%s"
-        private const val PDF_FILE_NAME = "PDF_PHOTOS.pdf"
-        private const val PDF_DIRECTORY = "pdf"
+        private const val IMAGES_DIRECTORY = "img"
         private const val IMAGE_EXT = ".png"
         private const val IMAGE_MIME_TYPE = "image/"
-        private const val FILE_NAME_SEPARATOR = "_"
         private const val HIDDEN_FILE_SYMBOL = "."
     }
 }

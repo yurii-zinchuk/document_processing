@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.example.scandoc.domain.usecases.CreateDocumentSetUseCase
-import com.example.scandoc.domain.usecases.CreatePDFUseCase
 import com.example.scandoc.domain.usecases.DeleteDocumentSetUseCase
 import com.example.scandoc.domain.usecases.GetAllDocumentSetsUseCase
 import com.example.scandoc.presentation.mappers.MapperDocumentSetDomainToUI

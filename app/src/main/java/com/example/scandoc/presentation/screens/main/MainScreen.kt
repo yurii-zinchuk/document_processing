@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -34,11 +34,13 @@ import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.scandoc.presentation.navigation.Route
+import com.example.scandoc.presentation.screens.details.components.toolbar.MainToolbar
 import com.example.scandoc.presentation.screens.main.components.ChooseImageSourceDialog
 import com.example.scandoc.presentation.screens.main.components.DocumentSetItem
 import com.example.scandoc.presentation.screens.main.components.SelectNameDialog
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun MainScreen(
     vm: MainScreenVM,
     navController: NavHostController,
@@ -73,16 +75,11 @@ fun MainScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
     ) {
         val documentSets = vm.documentSets.collectAsLazyPagingItems()
         Column {
-            Text(
-                modifier = Modifier
-                    .padding(16.dp),
-                text = "Document Sets",
-                fontSize = 36.sp
-            )
+            MainToolbar()
+            Spacer(modifier = Modifier.height(16.dp))
             if (documentSets.itemCount == 0) {
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(

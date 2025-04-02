@@ -10,7 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import com.example.scandoc.presentation.screens.details.components.entities.TabEntities
-import com.example.scandoc.presentation.screens.details.components.toolbar.Toolbar
+import com.example.scandoc.presentation.screens.details.components.toolbar.DetailsToolbar
 import com.example.scandoc.presentation.screens.details.components.photos.TabPhotos
 import com.example.scandoc.presentation.screens.details.components.tab_selector.Tab
 import com.example.scandoc.presentation.screens.details.components.tab_selector.TabSelector
@@ -29,7 +29,12 @@ fun DetailsScreen(
     ) {
         val scope = rememberCoroutineScope()
         val pagerState = rememberPagerState { Tab.entries.size }
-        Toolbar(navController)
+        DetailsToolbar(
+            navController = navController,
+            isProcessing = vm.isProcessing.value,
+            onProcess = vm::onProcessDocumentSet,
+            onStopProcessing = vm::onStopProcessingDocumentSet
+        )
         TabSelector(pagerState.currentPage) {
             scope.launch {
                 pagerState.animateScrollToPage(
@@ -47,7 +52,7 @@ fun DetailsScreen(
                 when (tab) {
                     Tab.RAW -> TabPhotos(vm.photos.value)
                     Tab.TEXT -> TabText(vm.text.value)
-                    Tab.ENTITIES -> TabEntities()
+                    Tab.ENTITIES -> TabEntities(vm.entities.value)
                 }
             }
         }

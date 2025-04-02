@@ -1,6 +1,6 @@
 package com.example.scandoc.presentation.screens.details.components.entities
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,14 +19,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TabEntities() {
-    Box(
+fun TabEntities(
+    entities: List<String>?,
+) {
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (entities == null) {
             Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
@@ -35,7 +39,7 @@ fun TabEntities() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Entities tab is under construction.",
+                text = "Entities are not available.",
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
@@ -45,6 +49,12 @@ fun TabEntities() {
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
+        } else {
+            entities.forEach {
+                Text(
+                    text = "Entity: $it"
+                )
+            }
         }
     }
 }
