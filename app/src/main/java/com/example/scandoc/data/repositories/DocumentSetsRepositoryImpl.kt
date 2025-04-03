@@ -11,14 +11,12 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.example.scandoc.data.room.AppDatabase
 import com.example.scandoc.data.room.mappers.MapperDocumentSetDomainToRoom
 import com.example.scandoc.data.room.mappers.MapperDocumentSetRoomToDomain
 import com.example.scandoc.data.storage.InternalStorage
 import com.example.scandoc.data.workers.ProcessingWorker
-import com.example.scandoc.data.workers.ProcessingWorker.Companion.FILE_KEY
-import com.example.scandoc.data.workers.ProcessingWorker.Companion.UUID_KEY
+import com.example.scandoc.data.workers.ProcessingWorker.Companion.wrapWorkData
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.models.ProcessedData
 import com.example.scandoc.domain.repositories.DocumentSetsRepository
@@ -57,10 +55,7 @@ class DocumentSetsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun processDocumentSet(uuid: UUID, pdfFile: File): UUID {
-        val input = workDataOf(
-            FILE_KEY to pdfFile.absolutePath,
-            UUID_KEY to uuid.toString(),
-        )
+        val input = wrapWorkData(pdfFile, uuid)
         val constraints =
             Constraints
                 .Builder()
