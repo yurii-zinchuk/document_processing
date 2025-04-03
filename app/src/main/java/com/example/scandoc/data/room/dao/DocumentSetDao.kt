@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.scandoc.data.room.models.RoomDocumentSet
 
 @Dao
@@ -20,4 +21,7 @@ interface DocumentSetDao {
 
     @Query("DELETE FROM document_set WHERE uuid = :uuid")
     suspend fun deleteDocumentSet(uuid: String)
+
+    @Update
+    suspend fun updateDocumentSet(documentSet: RoomDocumentSet)
 }

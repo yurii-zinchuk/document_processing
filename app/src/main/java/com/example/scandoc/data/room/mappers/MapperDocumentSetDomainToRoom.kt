@@ -12,6 +12,7 @@ class MapperDocumentSetDomainToRoom @Inject constructor() : DataMapper<DocumentS
                 uuid = uuid.toString(),
                 name = name,
                 timestamp = data.createdAt,
+                processingStatus = data.processingStatus
             )
         }
     }

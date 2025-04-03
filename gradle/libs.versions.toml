@@ -12,14 +12,15 @@ composeBom = "2025.03.01"
 navigationCompose = "2.8.9"
 hiltAndroid = "2.51.1"
 hiltCompose = "1.2.0"
+hiltWork = "1.2.0"
 room = "2.6.1"
 paging = "3.3.6"
 coil = "3.1.0"
 documentfile = "1.0.1"
 retrofit = "2.9.0"
 okhttp = "4.12.0"
-gson = "2.10.1"
-coroutines = "1.7.3"
+coroutines = "1.10.1"
+workRuntime = "2.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,7 +41,9 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltAndroid" }
+hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltCompose" }
+hilt-android-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room"}
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room"}
@@ -54,6 +57,7 @@ retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref 
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

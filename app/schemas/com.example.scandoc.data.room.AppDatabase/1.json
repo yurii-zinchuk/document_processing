@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0b4d4b0017fee06e789ad084d45fdd95",
+    "identityHash": "3e4c4a3bdd541e0810c7f27bf7a31f38",
     "entities": [
       {
         "tableName": "document_set",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `name` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`uuid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `name` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `processingStatus` TEXT NOT NULL, PRIMARY KEY(`uuid`))",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -25,6 +25,12 @@
             "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "processingStatus",
+            "columnName": "processingStatus",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -40,7 +46,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b4d4b0017fee06e789ad084d45fdd95')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e4c4a3bdd541e0810c7f27bf7a31f38')"
     ]
   }
 }

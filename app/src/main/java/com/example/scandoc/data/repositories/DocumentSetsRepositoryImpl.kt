@@ -1,21 +1,29 @@
 package com.example.scandoc.data.repositories
 
+import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.example.scandoc.data.network.api.ProcessingApi
-import com.example.scandoc.data.network.mappers.MapperFileToMultipart
-import com.example.scandoc.data.network.mappers.MapperProcessingResultResponseToDomain
-import com.example.scandoc.data.network.models.TaskStatusResponse
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.scandoc.data.room.AppDatabase
 import com.example.scandoc.data.room.mappers.MapperDocumentSetDomainToRoom
 import com.example.scandoc.data.room.mappers.MapperDocumentSetRoomToDomain
 import com.example.scandoc.data.storage.InternalStorage
+import com.example.scandoc.data.workers.ProcessingWorker
+import com.example.scandoc.data.workers.ProcessingWorker.Companion.FILE_KEY
+import com.example.scandoc.data.workers.ProcessingWorker.Companion.UUID_KEY
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.models.ProcessedData
+import com.example.scandoc.domain.models.ProcessingStatus
 import com.example.scandoc.domain.repositories.DocumentSetsRepository
-import kotlinx.coroutines.delay
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -25,11 +33,9 @@ import javax.inject.Inject
 class DocumentSetsRepositoryImpl @Inject constructor(
     private val mapperDocumentSetDomainToRoom: MapperDocumentSetDomainToRoom,
     private val mapperDocumentSetRoomToDomain: MapperDocumentSetRoomToDomain,
-    private val mapperProcessingResultResponseToDomain: MapperProcessingResultResponseToDomain,
-    private val mapperFileToMultipart: MapperFileToMultipart,
-    private val processingApi: ProcessingApi,
     private val internalStorage: InternalStorage,
     private val database: AppDatabase,
+    @ApplicationContext private val context: Context,
 ) : DocumentSetsRepository {
 
     override suspend fun deleteDocumentSet(uuid: UUID) {
@@ -50,38 +56,36 @@ class DocumentSetsRepositoryImpl @Inject constructor(
             .let { mapperDocumentSetRoomToDomain.map(it) }
     }
 
-    override suspend fun processDocumentSet(pdfFile: File): ProcessedData? {
-        try {
-            val uploadResponse =
-                mapperFileToMultipart.map(pdfFile)
-                    .let { processingApi.uploadPdf(it) }
-                    .also { if (!it.isSuccessful) throw ProcessingException() }
-
-            val taskId = uploadResponse.body()?.taskId ?: throw ProcessingException()
-
-            repeat(POLLING_RETRIES) {
-                delay(POLLING_DELAY)
-
-                val taskStatusResponse = processingApi
-                    .getTaskStatus(taskId)
-                    .also { if (!it.isSuccessful) throw ProcessingException() }
-
-                taskStatusResponse
-                    .body()
-                    ?.let { responseBody ->
-                        when(responseBody.status) {
-                            TaskStatusResponse.TaskStatus.DONE -> return responseBody.result
-                                ?.let { result -> mapperProcessingResultResponseToDomain.map(result) }
-                            TaskStatusResponse.TaskStatus.ERROR -> throw ProcessingException()
-                            else -> {}
-                        }
-                    }
-            }
-        } catch (_: ProcessingException) {
-            return null
+    override suspend fun updateDocumentSetProcessingStatus(uuid: UUID, status: ProcessingStatus) {
+        database.documentSetDao().run {
+            getDocumentSetByUUID(uuid.toString())
+                .copy(processingStatus = status)
+                .let { updateDocumentSet(it) }
         }
+    }
 
-        return null
+    override suspend fun processDocumentSet(uuid: UUID, pdfFile: File): UUID {
+        val input = workDataOf(
+            FILE_KEY to pdfFile.absolutePath,
+            UUID_KEY to uuid.toString(),
+        )
+        val constraints =
+            Constraints
+                .Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+        val request = OneTimeWorkRequestBuilder<ProcessingWorker>()
+            .setInputData(input)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            uniqueWorkName = uuid.toString(),
+            existingWorkPolicy = ExistingWorkPolicy.REPLACE,
+            request = request,
+        )
+
+        return request.id
     }
 
     override fun getAllDocumentSets(): Flow<PagingData<DocumentSet>> {
@@ -99,8 +103,8 @@ class DocumentSetsRepositoryImpl @Inject constructor(
 
     override fun getProcessedData(uuid: UUID): ProcessedData {
         val text = getProcessedTextFile(uuid)
-                .takeIf { it.exists() }
-                ?.readText()
+            .takeIf { it.exists() }
+            ?.readText()
         val entities = getProcessedEntitiesFile(uuid)
             .takeIf { it.exists() }
             ?.readText()
@@ -109,21 +113,8 @@ class DocumentSetsRepositoryImpl @Inject constructor(
         return ProcessedData(text, entities)
     }
 
-    override fun saveProcessedData(uuid: UUID, data: ProcessedData) {
-        data.run {
-            if (text != null) {
-                getProcessedTextFile(uuid)
-                    .also { if (!it.exists()) it.createNewFile() }
-                    .takeIf { it.exists() }
-                    ?.writeText(text)
-            }
-            entities?.joinToString(ENTITIES_SEPARATOR)?.let { entitiesText ->
-                getProcessedEntitiesFile(uuid)
-                    .also { if (!it.exists()) it.createNewFile() }
-                    .takeIf { it.exists() }
-                    ?.writeText(entitiesText)
-            }
-        }
+    override fun getDocumentSetWorkInfo(uuid: UUID): Flow<List<WorkInfo>> {
+        return WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(uuid.toString())
     }
 
     private fun getInternalProcessedDataDirectory(uuid: UUID): File =
@@ -150,9 +141,5 @@ class DocumentSetsRepositoryImpl @Inject constructor(
         private const val PROCESSED_DATA_DIRECTORY = "processed"
         private const val ENTITIES_SEPARATOR = "\n"
         private const val PHOTOS_PAGE_SIZE = 20
-        private const val POLLING_RETRIES = 300
-        private const val POLLING_DELAY = 10_000L
     }
-
-    private inner class ProcessingException : Exception()
 }

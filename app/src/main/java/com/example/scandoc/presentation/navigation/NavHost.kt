@@ -2,6 +2,7 @@ package com.example.scandoc.presentation.navigation
 
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -40,12 +41,14 @@ fun NavigationHost(navController: NavHostController) {
                 }
             )
         ) { backStackEntry ->
-            val vm = hiltViewModel<DetailsScreenVM>().apply {
-                backStackEntry
+            val vm = hiltViewModel<DetailsScreenVM>()
+            val uuid = backStackEntry
                     .arguments
                     ?.getString(UUID_ARG_NAME)
                     ?.let { UUID.fromString(it) }
-                    ?.let { uuid -> init(uuid) }
+
+            LaunchedEffect(uuid) {
+                vm.init(uuid!!)
             }
             DetailsScreen(vm, navController)
         }

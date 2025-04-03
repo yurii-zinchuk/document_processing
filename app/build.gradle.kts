@@ -51,6 +51,9 @@ kapt {
 }
 dependencies {
 
+    // WorkManager
+    implementation(libs.work.runtime.ktx)
+
     // Networking
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
@@ -65,8 +68,10 @@ dependencies {
 
     // Hilt
     kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.android.work)
 
     // Room
     ksp(libs.room.compiler)

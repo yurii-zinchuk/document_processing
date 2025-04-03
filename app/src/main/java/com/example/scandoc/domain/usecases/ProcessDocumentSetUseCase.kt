@@ -11,10 +11,10 @@ class ProcessDocumentSetUseCase @Inject constructor(
     private val pdfRepository: PDFRepository
 ) {
 
-    suspend fun execute(uuid: UUID): ProcessedData? {
+    suspend fun execute(uuid: UUID): UUID {
         val pdfFile = pdfRepository.getPDF(uuid)
-        return documentSetsRepository.processDocumentSet(pdfFile)
-            ?.also { documentSetsRepository.saveProcessedData(uuid, it) }
+        val processingWorkId = documentSetsRepository.processDocumentSet(uuid, pdfFile)
+        return processingWorkId
     }
 
 }

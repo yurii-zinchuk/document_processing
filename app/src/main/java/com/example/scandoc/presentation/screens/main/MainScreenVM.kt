@@ -7,13 +7,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
+import androidx.work.WorkInfo
+import com.example.scandoc.domain.models.ProcessingStatus
 import com.example.scandoc.domain.usecases.CreateDocumentSetUseCase
 import com.example.scandoc.domain.usecases.DeleteDocumentSetUseCase
 import com.example.scandoc.domain.usecases.GetAllDocumentSetsUseCase
+import com.example.scandoc.domain.usecases.GetDocumentSetWorkInfoUseCase
+import com.example.scandoc.domain.usecases.UpdateProcessingStatusUseCase
 import com.example.scandoc.presentation.mappers.MapperDocumentSetDomainToUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -23,6 +31,8 @@ class MainScreenVM @Inject constructor(
     private val mapperDocumentSetDomainToUI: MapperDocumentSetDomainToUI,
     private val createDocumentSetUseCase: CreateDocumentSetUseCase,
     private val deleteDocumentSetUseCase: DeleteDocumentSetUseCase,
+    private val getDocumentSetWorkInfoUseCase: GetDocumentSetWorkInfoUseCase,
+    private val updateProcessingStatusUseCase: UpdateProcessingStatusUseCase,
     getAllDocumentSetsUseCase: GetAllDocumentSetsUseCase,
 ) : ViewModel() {
     private var selectedImagesUris = emptyList<Uri>()
@@ -30,7 +40,10 @@ class MainScreenVM @Inject constructor(
     val documentSets = getAllDocumentSetsUseCase
         .execute()
         .map { pagingData ->
-            pagingData.map { mapperDocumentSetDomainToUI.map(it) }
+            pagingData.map {
+//                handleProcessingStatus(it.uuid)
+                mapperDocumentSetDomainToUI.map(it)
+            }
         }
         .cachedIn(viewModelScope)
 
@@ -70,5 +83,22 @@ class MainScreenVM @Inject constructor(
 
     fun onDismissSetNameDialog() {
         _enterSetNameDialogVisible.value = false
+    }
+
+    private fun handleProcessingStatus(uuid: UUID) {
+        getDocumentSetWorkInfoUseCase.execute(uuid)
+            .mapNotNull { infos -> infos.firstOrNull() }
+            .take(1)
+            .onEach {
+                when (it.state) {
+                    WorkInfo.State.ENQUEUED -> ProcessingStatus.RUNNING
+                    WorkInfo.State.RUNNING -> ProcessingStatus.RUNNING
+                    WorkInfo.State.SUCCEEDED -> ProcessingStatus.SUCCESS
+                    WorkInfo.State.FAILED -> ProcessingStatus.FAILURE
+                    WorkInfo.State.BLOCKED -> ProcessingStatus.RUNNING
+                    WorkInfo.State.CANCELLED -> ProcessingStatus.SUCCESS
+                }.let { status -> updateProcessingStatusUseCase.execute(uuid, status) }
+            }
+            .launchIn(viewModelScope)
     }
 }

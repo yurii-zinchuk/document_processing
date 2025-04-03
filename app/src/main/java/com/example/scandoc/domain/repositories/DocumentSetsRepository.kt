@@ -1,8 +1,11 @@
 package com.example.scandoc.domain.repositories
 
 import androidx.paging.PagingData
+import androidx.work.ListenableWorker
+import androidx.work.WorkInfo
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.models.ProcessedData
+import com.example.scandoc.domain.models.ProcessingStatus
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 import java.util.UUID
@@ -15,12 +18,14 @@ interface DocumentSetsRepository {
 
     suspend fun getDocumentSet(uuid: UUID): DocumentSet
 
-    suspend fun processDocumentSet(pdfFile: File): ProcessedData?
+    suspend fun updateDocumentSetProcessingStatus(uuid: UUID, status: ProcessingStatus)
+
+    suspend fun processDocumentSet(uuid: UUID, pdfFile: File): UUID
 
     fun getAllDocumentSets(): Flow<PagingData<DocumentSet>>
 
     fun getProcessedData(uuid: UUID): ProcessedData
 
-    fun saveProcessedData(uuid: UUID, data: ProcessedData)
+    fun getDocumentSetWorkInfo(uuid: UUID): Flow<List<WorkInfo>>
 
 }

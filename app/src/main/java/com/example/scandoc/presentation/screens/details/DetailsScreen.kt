@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.example.scandoc.presentation.screens.details.components.entities.TabEntities
 import com.example.scandoc.presentation.screens.details.components.toolbar.DetailsToolbar
@@ -29,11 +30,12 @@ fun DetailsScreen(
     ) {
         val scope = rememberCoroutineScope()
         val pagerState = rememberPagerState { Tab.entries.size }
+        val context = LocalContext.current
         DetailsToolbar(
             navController = navController,
             isProcessing = vm.isProcessing.value,
             onProcess = vm::onProcessDocumentSet,
-            onStopProcessing = vm::onStopProcessingDocumentSet
+            onStopProcessing = { vm.onStopProcessingDocumentSet(context) }
         )
         TabSelector(pagerState.currentPage) {
             scope.launch {
