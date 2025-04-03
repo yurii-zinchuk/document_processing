@@ -26,7 +26,6 @@ class MapperDocumentSetDomainToUI @Inject constructor(
                 DATE_PATTERN,
                 Locale.getDefault()
             ).format(Date(data.createdAt)),
-            processingStatus = data.processingStatus,
         )
     }
 

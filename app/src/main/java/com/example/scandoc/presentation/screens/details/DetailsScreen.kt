@@ -30,12 +30,11 @@ fun DetailsScreen(
     ) {
         val scope = rememberCoroutineScope()
         val pagerState = rememberPagerState { Tab.entries.size }
-        val context = LocalContext.current
         DetailsToolbar(
             navController = navController,
             isProcessing = vm.isProcessing.value,
             onProcess = vm::onProcessDocumentSet,
-            onStopProcessing = { vm.onStopProcessingDocumentSet(context) }
+            onStopProcessing = vm::onStopProcessingDocumentSet
         )
         TabSelector(pagerState.currentPage) {
             scope.launch {

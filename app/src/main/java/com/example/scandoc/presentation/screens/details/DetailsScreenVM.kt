@@ -1,25 +1,19 @@
 package com.example.scandoc.presentation.screens.details
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.example.scandoc.domain.models.ProcessingStatus
+import com.example.scandoc.domain.usecases.CancelProcessingWorkUseCase
 import com.example.scandoc.domain.usecases.GetDocumentSetImagesUseCase
 import com.example.scandoc.domain.usecases.GetDocumentSetWorkInfoUseCase
 import com.example.scandoc.domain.usecases.GetProcessedDataUseCase
 import com.example.scandoc.domain.usecases.ProcessDocumentSetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -31,6 +25,7 @@ class DetailsScreenVM @Inject constructor(
     private val processDocumentSetUseCase: ProcessDocumentSetUseCase,
     private val getProcessedDataUseCase: GetProcessedDataUseCase,
     private val getDocumentSetWorkInfoUseCase: GetDocumentSetWorkInfoUseCase,
+    private val cancelProcessingWorkUseCase: CancelProcessingWorkUseCase,
 ) : ViewModel() {
     private var documentSetUUID: UUID? = null
 
@@ -67,9 +62,9 @@ class DetailsScreenVM @Inject constructor(
         }
     }
 
-    fun onStopProcessingDocumentSet(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+    fun onStopProcessingDocumentSet() = viewModelScope.launch(Dispatchers.IO) {
         documentSetUUID
-            ?.let { WorkManager.getInstance(context).cancelUniqueWork(it.toString()) }
+            ?.let { cancelProcessingWorkUseCase.execute(it) }
             ?.let { _isProcessing.value = false }
     }
 

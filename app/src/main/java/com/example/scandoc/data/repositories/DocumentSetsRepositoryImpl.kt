@@ -21,7 +21,6 @@ import com.example.scandoc.data.workers.ProcessingWorker.Companion.FILE_KEY
 import com.example.scandoc.data.workers.ProcessingWorker.Companion.UUID_KEY
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.models.ProcessedData
-import com.example.scandoc.domain.models.ProcessingStatus
 import com.example.scandoc.domain.repositories.DocumentSetsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +38,7 @@ class DocumentSetsRepositoryImpl @Inject constructor(
 ) : DocumentSetsRepository {
 
     override suspend fun deleteDocumentSet(uuid: UUID) {
+        cancelProcessingWork(uuid)
         database.documentSetDao().deleteDocumentSet(uuid.toString())
         getInternalProcessedDataDirectory(uuid)
             .takeIf { it.exists() && it.isDirectory }
@@ -54,14 +54,6 @@ class DocumentSetsRepositoryImpl @Inject constructor(
     override suspend fun getDocumentSet(uuid: UUID): DocumentSet {
         return database.documentSetDao().getDocumentSetByUUID(uuid.toString())
             .let { mapperDocumentSetRoomToDomain.map(it) }
-    }
-
-    override suspend fun updateDocumentSetProcessingStatus(uuid: UUID, status: ProcessingStatus) {
-        database.documentSetDao().run {
-            getDocumentSetByUUID(uuid.toString())
-                .copy(processingStatus = status)
-                .let { updateDocumentSet(it) }
-        }
     }
 
     override suspend fun processDocumentSet(uuid: UUID, pdfFile: File): UUID {
@@ -115,6 +107,10 @@ class DocumentSetsRepositoryImpl @Inject constructor(
 
     override fun getDocumentSetWorkInfo(uuid: UUID): Flow<List<WorkInfo>> {
         return WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(uuid.toString())
+    }
+
+    override fun cancelProcessingWork(uuid: UUID) {
+        WorkManager.getInstance(context).cancelUniqueWork(uuid.toString())
     }
 
     private fun getInternalProcessedDataDirectory(uuid: UUID): File =

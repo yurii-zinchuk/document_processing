@@ -6,5 +6,4 @@ data class DocumentSet(
     val uuid: UUID,
     val name: String,
     val createdAt: Long,
-    val processingStatus: ProcessingStatus = ProcessingStatus.RUNNING,
 )
