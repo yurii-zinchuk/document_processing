@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="pages">
-        <item quantity="one">%s page</item>
-        <item quantity="other">%s pages</item>
-    </plurals>
-</resources>

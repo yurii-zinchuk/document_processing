@@ -1,3 +1,51 @@
 <resources>
     <string name="app_name">ScanDoc</string>
+
+    <!--Document Set Item-->
+    <plurals name="document_set_item_pages">
+        <item quantity="one">%s page</item>
+        <item quantity="other">%s pages</item>
+    </plurals>
+    <string name="document_set_item_delete">Delete</string>
+    <!--Document Set Item-->
+
+    <!--Main Screen-->
+    <string name="main_screen_title">Document Sets</string>
+    <string name="main_screen_create_document_set_prompt">Upload one or more images to create your first document set</string>
+    <string name="main_screen_create_document_set_button">Create document set</string>
+    <!--Main Screen-->
+
+    <!--Select Images Dialog-->
+    <string name="select_images_dialog_title">Select Image Source</string>
+    <string name="select_images_dialog_option_gallery">From Gallery</string>
+    <string name="select_images_dialog_option_files">From Files</string>
+    <string name="select_images_dialog_option_directory">Choose directory</string>
+    <string name="select_images_dialog_cancel">Cancel</string>
+    <!--Select Images Dialog-->
+
+    <!--Set Name Dialog-->
+    <string name="set_name_dialog_title">Enter Name</string>
+    <string name="set_name_dialog_input_placeholder">Name</string>
+    <string name="set_name_dialog_confirm">Confirm</string>
+    <string name="set_name_dialog_cancel">Cancel</string>
+    <!--Set Name Dialog-->
+
+    <!--Details Screen-->
+    <string name="details_screen_tab_photos_title">Photos</string>
+    <string name="details_screen_tab_text_title">Text</string>
+    <string name="details_screen_tab_entities_title">Entities</string>
+
+    <string name="details_screen_tab_text_unavailable">Text is not available</string>
+    <string name="details_screen_tab_text_unavailable_description">Here you\'ll see text recognized from the photos</string>
+
+    <string name="details_screen_tab_entities_unavailable">Entities are not available</string>
+    <string name="details_screen_tab_entities_unavailable_description">Here you\'ll see named entities recognized from the text — like names, places, and dates</string>
+    <!--Details Screen-->
+
+    <!-- Notification -->
+    <string name="processing_notification_channel_name">Processing status</string>
+    <string name="processing_notification_channel_id">ProcessingStatusNotificationChannelId</string>
+    <string name="processing_notification_progress">Processing in progress…</string>
+    <string name="processing_notification_finished">Processing finished successfully!</string>
+    <!-- Notification -->
 </resources>

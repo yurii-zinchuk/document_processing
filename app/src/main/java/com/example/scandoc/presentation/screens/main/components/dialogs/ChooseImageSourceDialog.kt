@@ -1,4 +1,4 @@
-package com.example.scandoc.presentation.screens.main.components
+package com.example.scandoc.presentation.screens.main.components.dialogs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +7,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.example.scandoc.R
 
 @Composable
 fun ChooseImageSourceDialog(
@@ -18,25 +20,25 @@ fun ChooseImageSourceDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Image Source") },
+        title = { Text(stringResource(R.string.select_images_dialog_title)) },
         text = {
             Column {
                 OptionButton(
-                    "From Gallery",
+                    text = stringResource(R.string.select_images_dialog_option_gallery),
                     onClick = {
                         onGallery()
                         onDismiss()
                     }
                 )
                 OptionButton(
-                    "From Files",
+                    text = stringResource(R.string.select_images_dialog_option_files),
                     onClick = {
                         onFiles()
                         onDismiss()
                     }
                 )
                 OptionButton(
-                    "Choose Directory",
+                    text = stringResource(R.string.select_images_dialog_option_directory),
                     onClick = {
                         onDirectory()
                         onDismiss()
@@ -47,7 +49,7 @@ fun ChooseImageSourceDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.select_images_dialog_cancel))
             }
         }
     )

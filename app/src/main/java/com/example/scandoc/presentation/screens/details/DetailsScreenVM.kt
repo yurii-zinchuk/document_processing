@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scandoc.domain.usecases.CancelProcessingWorkUseCase
+import com.example.scandoc.domain.usecases.GetDocumentSetByUUIDUseCase
 import com.example.scandoc.domain.usecases.GetDocumentSetImagesUseCase
 import com.example.scandoc.domain.usecases.GetDocumentSetWorkInfoUseCase
 import com.example.scandoc.domain.usecases.GetProcessedDataUseCase
 import com.example.scandoc.domain.usecases.ProcessDocumentSetUseCase
+import com.example.scandoc.utils.EMPTY_STRING
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -26,46 +28,47 @@ class DetailsScreenVM @Inject constructor(
     private val getProcessedDataUseCase: GetProcessedDataUseCase,
     private val getDocumentSetWorkInfoUseCase: GetDocumentSetWorkInfoUseCase,
     private val cancelProcessingWorkUseCase: CancelProcessingWorkUseCase,
+    private val getDocumentSetByUUIDUseCase: GetDocumentSetByUUIDUseCase,
 ) : ViewModel() {
-    private var documentSetUUID: UUID? = null
+    private lateinit var documentSetUUID: UUID
 
     // State private
     private val _isProcessing = mutableStateOf(false)
     private val _photos = mutableStateOf<List<File>>(emptyList())
     private val _text = mutableStateOf<String?>(null)
     private val _entities = mutableStateOf<List<String>?>(null)
+    private val _title = mutableStateOf(EMPTY_STRING)
 
     // State public
     val isProcessing = _isProcessing as State<Boolean>
     val photos = _photos as State<List<File>>
     val text = _text as State<String?>
     val entities = _entities as State<List<String>?>
+    val title = _title as State<String>
 
     fun init(uuid: UUID) = viewModelScope.launch(Dispatchers.IO) {
         documentSetUUID = uuid
 
         observeProcessingWork(uuid)
-
-        getDocumentSetImagesUseCase.execute(uuid)
-            .let { _photos.value = it }
+        initDocumentSetData()
     }
 
     fun onProcessDocumentSet() = viewModelScope.launch(Dispatchers.IO) {
-        documentSetUUID?.let {
+        documentSetUUID.let {
             _isProcessing.value = true
             try {
                 processDocumentSetUseCase.execute(it)
             } catch (_: Exception) {
                 /* no-op */
             }
-            observeProcessingWork(documentSetUUID ?: return@let)
+            observeProcessingWork(documentSetUUID)
         }
     }
 
     fun onStopProcessingDocumentSet() = viewModelScope.launch(Dispatchers.IO) {
         documentSetUUID
-            ?.let { cancelProcessingWorkUseCase.execute(it) }
-            ?.let { _isProcessing.value = false }
+            .let { cancelProcessingWorkUseCase.execute(it) }
+            .let { _isProcessing.value = false }
     }
 
     private fun observeProcessingWork(uuid: UUID) {
@@ -80,6 +83,13 @@ class DetailsScreenVM @Inject constructor(
 
             }
             .launchIn(viewModelScope)
+    }
+
+    private suspend fun initDocumentSetData() {
+        getDocumentSetByUUIDUseCase.execute(documentSetUUID)
+            .let { _title.value = it.name }
+        getDocumentSetImagesUseCase.execute(documentSetUUID)
+            .let { _photos.value = it }
     }
 
     private fun onProcessingFinished(uuid: UUID) {

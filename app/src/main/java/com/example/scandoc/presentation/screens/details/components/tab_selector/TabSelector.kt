@@ -24,7 +24,7 @@ fun TabSelector(
         Tab.entries.forEachIndexed { index, tab ->
             Tab(
                 selected = index == selectedTabIndex,
-                text = { Text(tab.name) },
+                text = { Text(tab.displayName) },
                 onClick = {
                     currentSelectedTabIndex = index
                     onTabSelected.invoke(tab)

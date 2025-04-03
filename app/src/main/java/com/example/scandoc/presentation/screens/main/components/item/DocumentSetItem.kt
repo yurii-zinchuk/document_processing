@@ -1,4 +1,4 @@
-package com.example.scandoc.presentation.screens.main.components
+package com.example.scandoc.presentation.screens.main.components.item
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -77,7 +78,7 @@ fun DocumentSetItem(
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 2.dp),
                     text = pluralStringResource(
-                        R.plurals.pages,
+                        R.plurals.document_set_item_pages,
                         data.numberOfPages,
                         data.numberOfPages
                     ),
@@ -116,7 +117,7 @@ fun DocumentSetItem(
                     onDismissRequest = { menuVisible = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Delete") },
+                        text = { Text(stringResource(R.string.document_set_item_delete)) },
                         onClick = {
                             onDelete.invoke(data.uuid)
                             menuVisible = false

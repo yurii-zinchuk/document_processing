@@ -32,6 +32,7 @@ import androidx.navigation.NavHostController
 @ExperimentalMaterial3Api
 fun DetailsToolbar(
     navController: NavHostController,
+    title: String,
     isProcessing: Boolean,
     onProcess: () -> Unit,
     onStopProcessing: () -> Unit,
@@ -47,7 +48,7 @@ fun DetailsToolbar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Set Name",
+                        text = title,
                         fontSize = 20.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

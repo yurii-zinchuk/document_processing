@@ -8,14 +8,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import com.example.scandoc.presentation.screens.details.components.entities.TabEntities
-import com.example.scandoc.presentation.screens.details.components.toolbar.DetailsToolbar
-import com.example.scandoc.presentation.screens.details.components.photos.TabPhotos
+import com.example.scandoc.presentation.screens.details.components.tabs.TabEntities
+import com.example.scandoc.presentation.screens.details.components.tabs.TabPhotos
 import com.example.scandoc.presentation.screens.details.components.tab_selector.Tab
 import com.example.scandoc.presentation.screens.details.components.tab_selector.TabSelector
-import com.example.scandoc.presentation.screens.details.components.text.TabText
+import com.example.scandoc.presentation.screens.details.components.tabs.TabText
+import com.example.scandoc.presentation.screens.details.components.toolbar.DetailsToolbar
 import kotlinx.coroutines.launch
 
 @Composable
@@ -32,6 +31,7 @@ fun DetailsScreen(
         val pagerState = rememberPagerState { Tab.entries.size }
         DetailsToolbar(
             navController = navController,
+            title = vm.title.value,
             isProcessing = vm.isProcessing.value,
             onProcess = vm::onProcessDocumentSet,
             onStopProcessing = vm::onStopProcessingDocumentSet
@@ -51,7 +51,7 @@ fun DetailsScreen(
         ) {
             Tab.entries[it].let { tab ->
                 when (tab) {
-                    Tab.RAW -> TabPhotos(vm.photos.value)
+                    Tab.PHOTOS -> TabPhotos(vm.photos.value)
                     Tab.TEXT -> TabText(vm.text.value)
                     Tab.ENTITIES -> TabEntities(vm.entities.value)
                 }

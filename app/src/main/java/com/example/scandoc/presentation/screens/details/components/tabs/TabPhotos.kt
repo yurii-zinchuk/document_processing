@@ -1,4 +1,4 @@
-package com.example.scandoc.presentation.screens.details.components.photos
+package com.example.scandoc.presentation.screens.details.components.tabs
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth

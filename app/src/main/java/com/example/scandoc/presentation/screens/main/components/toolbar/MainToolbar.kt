@@ -8,8 +8,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import com.example.scandoc.R
 
 @Composable
 @ExperimentalMaterial3Api
@@ -22,7 +24,7 @@ fun MainToolbar() {
             Column {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "Document Sets",
+                    text = stringResource(R.string.main_screen_title),
                     fontSize = 36.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
