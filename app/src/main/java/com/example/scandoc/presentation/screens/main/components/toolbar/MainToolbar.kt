@@ -1,4 +1,4 @@
-package com.example.scandoc.presentation.screens.details.components.toolbar
+package com.example.scandoc.presentation.screens.main.components.toolbar
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +18,8 @@ import com.example.scandoc.R
 fun MainToolbar() {
     TopAppBar(
         modifier =
-        Modifier
-            .fillMaxWidth(),
+            Modifier
+                .fillMaxWidth(),
         title = {
             Column {
                 Spacer(modifier = Modifier.weight(1f))

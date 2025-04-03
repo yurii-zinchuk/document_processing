@@ -25,9 +25,7 @@ class NetworkModule {
     }
 
     @Provides
-    fun provideOkHttpClient(
-        loggingInterceptor: HttpLoggingInterceptor,
-    ): OkHttpClient =
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
         OkHttpClient
             .Builder()
             .addInterceptor(loggingInterceptor)
@@ -37,9 +35,7 @@ class NetworkModule {
             .build()
 
     @Provides
-    fun provideRetrofit(
-        okHttpClient: OkHttpClient,
-    ): Retrofit =
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
         Retrofit
             .Builder()
             .baseUrl("http://10.0.2.2:8000/")

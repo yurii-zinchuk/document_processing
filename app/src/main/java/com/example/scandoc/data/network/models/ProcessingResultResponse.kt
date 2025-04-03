@@ -6,5 +6,5 @@ data class ProcessingResultResponse(
     @SerializedName("text")
     val text: String,
     @SerializedName("entities")
-    val entities: List<String>
+    val entities: List<String>,
 )

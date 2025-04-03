@@ -20,23 +20,16 @@ import java.io.File
 @InstallIn(SingletonComponent::class)
 abstract class MappersModule {
     @Binds
-    abstract fun bindMapperDocumentSetRoomToDomain(
-        mapper: MapperDocumentSetRoomToDomain
-    ): DataMapper<RoomDocumentSet, DocumentSet>
+    abstract fun bindMapperDocumentSetRoomToDomain(mapper: MapperDocumentSetRoomToDomain): DataMapper<RoomDocumentSet, DocumentSet>
 
     @Binds
-    abstract fun bindMapperDocumentSetDomainToRoom(
-        mapper: MapperDocumentSetDomainToRoom
-    ): DataMapper<DocumentSet, RoomDocumentSet>
+    abstract fun bindMapperDocumentSetDomainToRoom(mapper: MapperDocumentSetDomainToRoom): DataMapper<DocumentSet, RoomDocumentSet>
 
     @Binds
-    abstract fun bindMapperFileToMultipart(
-        mapper: MapperFileToMultipart
-    ): DataMapper<File, MultipartBody.Part>
+    abstract fun bindMapperFileToMultipart(mapper: MapperFileToMultipart): DataMapper<File, MultipartBody.Part>
 
     @Binds
     abstract fun bindMapperProcessingResultResponseToDomain(
-        mapper: MapperProcessingResultResponseToDomain
+        mapper: MapperProcessingResultResponseToDomain,
     ): DataMapper<ProcessingResultResponse, ProcessedData>
-
 }

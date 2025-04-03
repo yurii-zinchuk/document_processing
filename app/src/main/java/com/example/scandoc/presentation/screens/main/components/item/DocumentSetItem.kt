@@ -45,65 +45,74 @@ import java.util.UUID
 fun DocumentSetItem(
     data: DocumentSetItemData,
     onClick: () -> Unit = {},
-    onDelete: (UUID) -> Unit = {}
+    onDelete: (UUID) -> Unit = {},
 ) {
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
         onClick = onClick,
     ) {
         Box {
             Column {
                 AsyncImage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    model = ImageRequest
-                        .Builder(LocalContext.current)
-                        .data(data.previewImage)
-                        .crossfade(true)
-                        .build(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                    model =
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(data.previewImage)
+                            .crossfade(true)
+                            .build(),
                     contentDescription = null,
                     contentScale = ContentScale.FillWidth,
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
                     text = data.name,
                     fontSize = 22.sp,
                 )
                 Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                    text = pluralStringResource(
-                        R.plurals.document_set_item_pages,
-                        data.numberOfPages,
-                        data.numberOfPages
-                    ),
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    text =
+                        pluralStringResource(
+                            R.plurals.document_set_item_pages,
+                            data.numberOfPages,
+                            data.numberOfPages,
+                        ),
                     fontSize = 16.sp,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }
             Text(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
                 text = data.createdAt,
                 fontSize = 16.sp,
             )
             Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = (-8).dp, y = 8.dp)
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-8).dp, y = 8.dp),
             ) {
                 var menuVisible by remember { mutableStateOf(false) }
                 IconButton(
-                    modifier = Modifier
-                        .background(Color.White, RoundedCornerShape(percent = 100))
-                        .size(32.dp),
-                    onClick = { menuVisible = true }
+                    modifier =
+                        Modifier
+                            .background(Color.White, RoundedCornerShape(percent = 100))
+                            .size(32.dp),
+                    onClick = { menuVisible = true },
                 ) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
@@ -111,10 +120,11 @@ fun DocumentSetItem(
                     )
                 }
                 DropdownMenu(
-                    modifier = Modifier
-                        .align(Alignment.TopStart),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart),
                     expanded = menuVisible,
-                    onDismissRequest = { menuVisible = false }
+                    onDismissRequest = { menuVisible = false },
                 ) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.document_set_item_delete)) },

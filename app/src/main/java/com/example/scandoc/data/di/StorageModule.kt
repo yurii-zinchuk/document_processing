@@ -11,7 +11,5 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class StorageModule {
     @Binds
-    abstract fun bindInternalStorage(
-        storageImpl: InternalStorageImpl
-    ): InternalStorage
+    abstract fun bindInternalStorage(storageImpl: InternalStorageImpl): InternalStorage
 }

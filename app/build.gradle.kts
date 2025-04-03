@@ -58,7 +58,7 @@ ktlint {
             "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
             "ktlint_ignore_back_ticked_identifier" to "true",
             "ktlint_standard_package-name" to "disabled",
-            "ktlint_ignore_back_ticked_identifier" to "disabled",
+            "ktlint_standard_backing-property-naming" to "disabled",
         ),
     )
 }

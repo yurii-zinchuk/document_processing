@@ -15,17 +15,11 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class RepositoriesModule {
     @Binds
-    abstract fun bindImagesRepository(
-        repositoryImpl: ImagesRepositoryImpl,
-    ): ImagesRepository
+    abstract fun bindImagesRepository(repositoryImpl: ImagesRepositoryImpl): ImagesRepository
 
     @Binds
-    abstract fun bindDocumentSetsRepository(
-        repositoryImpl: DocumentSetsRepositoryImpl,
-    ): DocumentSetsRepository
+    abstract fun bindDocumentSetsRepository(repositoryImpl: DocumentSetsRepositoryImpl): DocumentSetsRepository
 
     @Binds
-    abstract fun bindPDFRepository(
-        repositoryImpl: PDFRepositoryImpl,
-    ): PDFRepository
+    abstract fun bindPDFRepository(repositoryImpl: PDFRepositoryImpl): PDFRepository
 }

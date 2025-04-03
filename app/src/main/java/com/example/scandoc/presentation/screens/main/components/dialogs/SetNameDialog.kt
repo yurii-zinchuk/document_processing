@@ -17,7 +17,7 @@ import com.example.scandoc.utils.EMPTY_STRING
 @Composable
 fun SetNameDialog(
     onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var text by remember { mutableStateOf(EMPTY_STRING) }
 
@@ -30,14 +30,14 @@ fun SetNameDialog(
                     value = text,
                     onValueChange = { text = it },
                     placeholder = { Text(stringResource(R.string.set_name_dialog_input_placeholder)) },
-                    singleLine = true
+                    singleLine = true,
                 )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(text) },
-                enabled = text.isNotBlank()
+                enabled = text.isNotBlank(),
             ) {
                 Text(stringResource(R.string.set_name_dialog_confirm))
             }
@@ -46,6 +46,6 @@ fun SetNameDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.set_name_dialog_cancel))
             }
-        }
+        },
     )
 }

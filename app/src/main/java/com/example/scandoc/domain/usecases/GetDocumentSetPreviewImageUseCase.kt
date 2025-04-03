@@ -5,12 +5,14 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 
-class GetDocumentSetPreviewImageUseCase @Inject constructor(
-    private val imagesRepository: ImagesRepository,
-) {
-    suspend fun execute(uuid: UUID): File {
-        return imagesRepository.getImages(uuid)
-            .firstOrNull()
-            ?: error("No preview found!")
+class GetDocumentSetPreviewImageUseCase
+    @Inject
+    constructor(
+        private val imagesRepository: ImagesRepository,
+    ) {
+        suspend fun execute(uuid: UUID): File {
+            return imagesRepository.getImages(uuid)
+                .firstOrNull()
+                ?: error("No preview found!")
+        }
     }
-}

@@ -27,170 +27,182 @@ import java.io.File
 import java.util.UUID
 
 @HiltWorker
-class ProcessingWorker @AssistedInject constructor(
-    @Assisted private val context: Context,
-    @Assisted workerParameters: WorkerParameters,
-    private val mapperProcessingResultResponseToDomain: MapperProcessingResultResponseToDomain,
-    private val mapperFileToMultipart: MapperFileToMultipart,
-    private val processingApi: ProcessingApi,
-    private val internalStorage: InternalStorage,
-    private val notificationManager: ProcessingNotificationManager,
-    private val appDatabase: AppDatabase,
-) : CoroutineWorker(
-    context,
-    workerParameters,
-) {
-    private var documentSetUUID = unwrapWorkData(inputData).uuid
+class ProcessingWorker
+    @AssistedInject
+    constructor(
+        @Assisted private val context: Context,
+        @Assisted workerParameters: WorkerParameters,
+        private val mapperProcessingResultResponseToDomain: MapperProcessingResultResponseToDomain,
+        private val mapperFileToMultipart: MapperFileToMultipart,
+        private val processingApi: ProcessingApi,
+        private val internalStorage: InternalStorage,
+        private val notificationManager: ProcessingNotificationManager,
+        private val appDatabase: AppDatabase,
+    ) : CoroutineWorker(
+            context,
+            workerParameters,
+        ) {
+        private var documentSetUUID = unwrapWorkData(inputData).uuid
 
-    override suspend fun doWork(): Result = try {
-        notificationManager.createNotificationChannel()
-        setForeground(getForegroundInfo())
+        override suspend fun doWork(): Result =
+            try {
+                notificationManager.createNotificationChannel()
+                setForeground(getForegroundInfo())
 
-        val pdfFile = unwrapWorkData(inputData).file
-        val uploadResponse = uploadPDFFile(pdfFile)
-        val taskId = uploadResponse.taskId
+                val pdfFile = unwrapWorkData(inputData).file
+                val uploadResponse = uploadPDFFile(pdfFile)
+                val taskId = uploadResponse.taskId
 
-        repeat(POLLING_RETRIES) {
-            delay(POLLING_DELAY)
+                repeat(POLLING_RETRIES) {
+                    delay(POLLING_DELAY)
 
-            getTaskStatusResponse(taskId).let {
-                when (it.status) {
-                    TaskStatusResponse.TaskStatus.DONE -> onTaskDone(it)
-                    TaskStatusResponse.TaskStatus.ERROR -> onProcessingFailed()
-                    else -> noop()
+                    getTaskStatusResponse(taskId).let {
+                        when (it.status) {
+                            TaskStatusResponse.TaskStatus.DONE -> onTaskDone(it)
+                            TaskStatusResponse.TaskStatus.ERROR -> onProcessingFailed()
+                            else -> noop()
+                        }
+                    }
+                }
+                onProcessingFailed()
+            } catch (_: ProcessingSuccess) {
+                Result.success()
+            } catch (_: ProcessingFailure) {
+                Result.failure()
+            } catch (_: Throwable) {
+                // Every other exception in processing
+                Result.failure()
+            }
+
+        override suspend fun getForegroundInfo(): ForegroundInfo =
+            if (SDK_INT >= Q) {
+                ForegroundInfo(
+                    PROGRESS_NOTIFICATION_ID + documentSetUUID.hashCode(),
+                    notificationManager.getNotification(getDocumentSetName(documentSetUUID)),
+                    FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+                )
+            } else {
+                ForegroundInfo(
+                    PROGRESS_NOTIFICATION_ID + documentSetUUID.hashCode(),
+                    notificationManager.getNotification(getDocumentSetName(documentSetUUID)),
+                )
+            }
+
+        private suspend fun uploadPDFFile(file: File): UploadPDFResponse {
+            return mapperFileToMultipart.map(file)
+                .let { processingApi.uploadPdf(it) }
+                .also { if (!it.isSuccessful) onProcessingFailed() }
+                .body()
+                ?: onProcessingFailed()
+        }
+
+        private suspend fun getTaskStatusResponse(taskId: String): TaskStatusResponse {
+            return processingApi
+                .getTaskStatus(taskId)
+                .also { if (!it.isSuccessful) onProcessingFailed() }
+                .body()
+                ?: onProcessingFailed()
+        }
+
+        private suspend fun onTaskDone(statusResponse: TaskStatusResponse) {
+            val result =
+                statusResponse.result
+                    ?.let { mapperProcessingResultResponseToDomain.map(it) }
+                    ?: onProcessingFailed()
+
+            saveProcessedData(documentSetUUID, result)
+            onProcessingSuccess()
+        }
+
+        private fun saveProcessedData(
+            uuid: UUID,
+            data: ProcessedData,
+        ) {
+            data.run {
+                if (text != null) {
+                    getProcessedTextFile(uuid)
+                        .also { if (!it.exists()) it.createNewFile() }
+                        .takeIf { it.exists() }
+                        ?.writeText(text)
+                }
+                entities?.joinToString(ENTITIES_SEPARATOR)?.let { entitiesText ->
+                    getProcessedEntitiesFile(uuid)
+                        .also { if (!it.exists()) it.createNewFile() }
+                        .takeIf { it.exists() }
+                        ?.writeText(entitiesText)
                 }
             }
         }
-        onProcessingFailed()
-    } catch (_: ProcessingSuccess) {
-        Result.success()
-    } catch (_: ProcessingFailure) {
-        Result.failure()
-    } catch (_: Throwable) { // Every other exception in processing
-        Result.failure()
-    }
 
-    override suspend fun getForegroundInfo(): ForegroundInfo =
-        if (SDK_INT >= Q) {
-            ForegroundInfo(
-                PROGRESS_NOTIFICATION_ID + documentSetUUID.hashCode(),
-                notificationManager.getNotification(getDocumentSetName(documentSetUUID)),
-                FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+        private fun getInternalProcessedDataDirectory(uuid: UUID): File =
+            File(
+                internalStorage.getDirectory(uuid),
+                PROCESSED_DATA_DIRECTORY,
+            ).also { if (!it.exists()) it.mkdirs() }
+
+        private fun getProcessedTextFile(uuid: UUID): File =
+            File(
+                getInternalProcessedDataDirectory(uuid),
+                PROCESSED_TEXT_FILE_NAME,
             )
-        } else {
-            ForegroundInfo(
-                PROGRESS_NOTIFICATION_ID + documentSetUUID.hashCode(),
-                notificationManager.getNotification(getDocumentSetName(documentSetUUID)),
+
+        private fun getProcessedEntitiesFile(uuid: UUID): File =
+            File(
+                getInternalProcessedDataDirectory(uuid),
+                PROCESSED_ENTITIES_FILE_NAME,
             )
+
+        private suspend fun onProcessingFailed(): Nothing {
+            notificationManager.sendFailureNotification(
+                getDocumentSetName(documentSetUUID),
+                documentSetUUID.toString(),
+            )
+            throw ProcessingFailure()
         }
 
-    private suspend fun uploadPDFFile(file: File): UploadPDFResponse {
-        return mapperFileToMultipart.map(file)
-            .let { processingApi.uploadPdf(it) }
-            .also { if (!it.isSuccessful) onProcessingFailed() }
-            .body()
-            ?: onProcessingFailed()
-    }
+        private suspend fun onProcessingSuccess(): Nothing {
+            notificationManager.sendSuccessNotification(
+                getDocumentSetName(documentSetUUID),
+                documentSetUUID.toString(),
+            )
+            throw ProcessingSuccess()
+        }
 
-    private suspend fun getTaskStatusResponse(taskId: String): TaskStatusResponse {
-        return processingApi
-            .getTaskStatus(taskId)
-            .also { if (!it.isSuccessful) onProcessingFailed() }
-            .body()
-            ?: onProcessingFailed()
-    }
+        private suspend fun getDocumentSetName(uuid: UUID): String {
+            return appDatabase.documentSetDao().getDocumentSetByUUID(uuid.toString()).name
+        }
 
-    private suspend fun onTaskDone(statusResponse: TaskStatusResponse) {
-        val result = statusResponse.result
-            ?.let { mapperProcessingResultResponseToDomain.map(it) }
-            ?: onProcessingFailed()
+        companion object {
+            private const val FILE_KEY = "PDF_FILE_NAME"
+            private const val UUID_KEY = "UUID_STRING"
 
-        saveProcessedData(documentSetUUID, result)
-        onProcessingSuccess()
-    }
+            private const val PROCESSED_TEXT_FILE_NAME = "text.txt"
+            private const val PROCESSED_ENTITIES_FILE_NAME = "entities.txt"
+            private const val PROCESSED_DATA_DIRECTORY = "processed"
+            private const val ENTITIES_SEPARATOR = "\n"
 
-    private fun saveProcessedData(uuid: UUID, data: ProcessedData) {
-        data.run {
-            if (text != null) {
-                getProcessedTextFile(uuid)
-                    .also { if (!it.exists()) it.createNewFile() }
-                    .takeIf { it.exists() }
-                    ?.writeText(text)
-            }
-            entities?.joinToString(ENTITIES_SEPARATOR)?.let { entitiesText ->
-                getProcessedEntitiesFile(uuid)
-                    .also { if (!it.exists()) it.createNewFile() }
-                    .takeIf { it.exists() }
-                    ?.writeText(entitiesText)
-            }
+            private const val POLLING_RETRIES = 300
+            private const val POLLING_DELAY = 10_000L
+
+            fun wrapWorkData(
+                pdfFilePath: File,
+                documentSetUUID: UUID,
+            ): Data =
+                workDataOf(
+                    FILE_KEY to pdfFilePath.absolutePath,
+                    UUID_KEY to documentSetUUID.toString(),
+                )
+
+            private fun unwrapWorkData(inputData: Data): WorkerInputData =
+                WorkerInputData(
+                    File(inputData.getString(FILE_KEY)!!),
+                    UUID.fromString(inputData.getString(UUID_KEY)!!),
+                )
         }
     }
-
-    private fun getInternalProcessedDataDirectory(uuid: UUID): File =
-        File(
-            internalStorage.getDirectory(uuid),
-            PROCESSED_DATA_DIRECTORY,
-        ).also { if (!it.exists()) it.mkdirs() }
-
-    private fun getProcessedTextFile(uuid: UUID): File =
-        File(
-            getInternalProcessedDataDirectory(uuid),
-            PROCESSED_TEXT_FILE_NAME,
-        )
-
-    private fun getProcessedEntitiesFile(uuid: UUID): File =
-        File(
-            getInternalProcessedDataDirectory(uuid),
-            PROCESSED_ENTITIES_FILE_NAME,
-        )
-
-    private suspend fun onProcessingFailed(): Nothing {
-        notificationManager.sendFailureNotification(
-            getDocumentSetName(documentSetUUID),
-            documentSetUUID.toString(),
-        )
-        throw ProcessingFailure()
-    }
-
-    private suspend fun onProcessingSuccess(): Nothing {
-        notificationManager.sendSuccessNotification(
-            getDocumentSetName(documentSetUUID),
-            documentSetUUID.toString(),
-        )
-        throw ProcessingSuccess()
-    }
-
-    private suspend fun getDocumentSetName(uuid: UUID): String {
-        return appDatabase.documentSetDao().getDocumentSetByUUID(uuid.toString()).name
-    }
-
-    companion object {
-        private const val FILE_KEY = "PDF_FILE_NAME"
-        private const val UUID_KEY = "UUID_STRING"
-
-        private const val PROCESSED_TEXT_FILE_NAME = "text.txt"
-        private const val PROCESSED_ENTITIES_FILE_NAME = "entities.txt"
-        private const val PROCESSED_DATA_DIRECTORY = "processed"
-        private const val ENTITIES_SEPARATOR = "\n"
-
-        private const val POLLING_RETRIES = 300
-        private const val POLLING_DELAY = 10_000L
-
-        fun wrapWorkData(pdfFilePath: File, documentSetUUID: UUID): Data =
-            workDataOf(
-                FILE_KEY to pdfFilePath.absolutePath,
-                UUID_KEY to documentSetUUID.toString()
-            )
-
-        private fun unwrapWorkData(inputData: Data): WorkerInputData =
-            WorkerInputData(
-                File(inputData.getString(FILE_KEY)!!),
-                UUID.fromString(inputData.getString(UUID_KEY)!!),
-            )
-    }
-}
 
 private class ProcessingFailure : Exception()
+
 private class ProcessingSuccess : Exception()
 
 private data class WorkerInputData(

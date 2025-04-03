@@ -1,7 +1,6 @@
 package com.example.scandoc.domain.repositories
 
 import androidx.paging.PagingData
-import androidx.work.ListenableWorker
 import androidx.work.WorkInfo
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.models.ProcessedData
@@ -10,14 +9,16 @@ import java.io.File
 import java.util.UUID
 
 interface DocumentSetsRepository {
-
     suspend fun deleteDocumentSet(uuid: UUID)
 
     suspend fun saveDocumentSet(documentSet: DocumentSet)
 
     suspend fun getDocumentSet(uuid: UUID): DocumentSet
 
-    suspend fun processDocumentSet(uuid: UUID, pdfFile: File): UUID
+    suspend fun processDocumentSet(
+        uuid: UUID,
+        pdfFile: File,
+    ): UUID
 
     fun getAllDocumentSets(): Flow<PagingData<DocumentSet>>
 
@@ -26,5 +27,4 @@ interface DocumentSetsRepository {
     fun getDocumentSetWorkInfo(uuid: UUID): Flow<List<WorkInfo>>
 
     fun cancelProcessingWork(uuid: UUID)
-
 }

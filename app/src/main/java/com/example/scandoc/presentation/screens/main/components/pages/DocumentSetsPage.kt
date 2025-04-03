@@ -29,30 +29,32 @@ fun DocumentSetsPage(
     onDeleteDocumentSet: (UUID) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp)
-            .navigationBarsPadding(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         items(
             count = documentSets.itemCount,
-            key = { documentSets[it]?.uuid ?: 0 }
+            key = { documentSets[it]?.uuid ?: 0 },
         ) { idx ->
             documentSets[idx]?.let {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem()
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .animateItem(),
                 ) {
                     DocumentSetItem(
                         data = it,
                         onClick = {
                             navController.navigate(
-                                Route.DETAILS_SCREEN.route + "/${Uri.encode(it.uuid.toString())}"
+                                Route.DETAILS_SCREEN.route + "/${Uri.encode(it.uuid.toString())}",
                             )
                         },
-                        onDelete = onDeleteDocumentSet
+                        onDelete = onDeleteDocumentSet,
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -61,8 +63,9 @@ fun DocumentSetsPage(
         if (documentSets.loadState.append is LoadState.Loading) {
             item {
                 CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(32.dp),
+                    modifier =
+                        Modifier
+                            .size(32.dp),
                 )
             }
         }

@@ -16,29 +16,29 @@ import coil3.request.crossfade
 import java.io.File
 
 @Composable
-fun TabPhotos(
-    images: List<File>
-) {
+fun TabPhotos(images: List<File>) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 8.dp)
-            .padding(top = 8.dp)
-            .navigationBarsPadding()
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp)
+                .padding(top = 8.dp)
+                .navigationBarsPadding(),
     ) {
         items(images.size) { idx ->
             AsyncImage(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                model = ImageRequest
-                    .Builder(LocalContext.current)
-                    .data(images[idx])
-                    .crossfade(true)
-                    .build(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+                model =
+                    ImageRequest
+                        .Builder(LocalContext.current)
+                        .data(images[idx])
+                        .crossfade(true)
+                        .build(),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
             )
         }
     }
-
 }

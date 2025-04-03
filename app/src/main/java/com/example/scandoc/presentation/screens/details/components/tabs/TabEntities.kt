@@ -21,14 +21,12 @@ import androidx.compose.ui.unit.dp
 import com.example.scandoc.R
 
 @Composable
-fun TabEntities(
-    entities: List<String>?,
-) {
-
+fun TabEntities(entities: List<String>?) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -37,24 +35,24 @@ fun TabEntities(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.details_screen_tab_entities_unavailable),
                 style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.details_screen_tab_entities_unavailable_description),
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         } else {
             entities.forEach {
                 Text(
-                    text = it
+                    text = it,
                 )
             }
         }

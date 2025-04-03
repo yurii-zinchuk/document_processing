@@ -14,11 +14,11 @@ interface ProcessingApi {
     @Multipart
     @POST("upload/pdf")
     suspend fun uploadPdf(
-        @Part file: MultipartBody.Part
+        @Part file: MultipartBody.Part,
     ): Response<UploadPDFResponse>
 
     @GET("tasks/{taskId}/status")
     suspend fun getTaskStatus(
-        @Path("taskId") taskId: String
+        @Path("taskId") taskId: String,
     ): Response<TaskStatusResponse>
 }

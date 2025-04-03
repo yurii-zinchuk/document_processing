@@ -1,6 +1,5 @@
 package com.example.scandoc.presentation.screens.details.components.toolbar
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,8 +38,8 @@ fun DetailsToolbar(
 ) {
     TopAppBar(
         modifier =
-        Modifier
-            .fillMaxWidth(),
+            Modifier
+                .fillMaxWidth(),
         title = {
             Column {
                 Spacer(modifier = Modifier.weight(1f))
@@ -56,8 +55,9 @@ fun DetailsToolbar(
                     Spacer(modifier = Modifier.width(8.dp))
                     if (isProcessing) {
                         CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(20.dp),
+                            modifier =
+                                Modifier
+                                    .size(20.dp),
                             strokeWidth = 2.dp,
                         )
                     }
@@ -68,9 +68,10 @@ fun DetailsToolbar(
         navigationIcon = {
             IconButton(
                 onClick = { navController.popBackStack() },
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f),
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f),
             ) {
                 Icon(
                     modifier = Modifier,
@@ -90,6 +91,6 @@ fun DetailsToolbar(
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
-        }
+        },
     )
 }

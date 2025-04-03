@@ -7,15 +7,17 @@ import com.example.scandoc.R
 enum class Tab {
     PHOTOS,
     TEXT,
-    ENTITIES;
+    ENTITIES,
+    ;
 
     val displayName: String
         @Composable
-        get() = stringResource(
-            when (this) {
-                PHOTOS -> R.string.details_screen_tab_photos_title
-                TEXT -> R.string.details_screen_tab_text_title
-                ENTITIES -> R.string.details_screen_tab_entities_title
-            }
-        )
+        get() =
+            stringResource(
+                when (this) {
+                    PHOTOS -> R.string.details_screen_tab_photos_title
+                    TEXT -> R.string.details_screen_tab_text_title
+                    ENTITIES -> R.string.details_screen_tab_entities_title
+                },
+            )
 }

@@ -28,7 +28,7 @@ fun TabSelector(
                 onClick = {
                     currentSelectedTabIndex = index
                     onTabSelected.invoke(tab)
-                }
+                },
             )
         }
     }

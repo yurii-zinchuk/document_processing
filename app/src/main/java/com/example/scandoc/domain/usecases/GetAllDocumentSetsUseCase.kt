@@ -6,10 +6,12 @@ import com.example.scandoc.domain.repositories.DocumentSetsRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAllDocumentSetsUseCase @Inject constructor(
-    private val documentSetsRepository: DocumentSetsRepository,
-) {
-    fun execute(): Flow<PagingData<DocumentSet>> {
-        return documentSetsRepository.getAllDocumentSets()
+class GetAllDocumentSetsUseCase
+    @Inject
+    constructor(
+        private val documentSetsRepository: DocumentSetsRepository,
+    ) {
+        fun execute(): Flow<PagingData<DocumentSet>> {
+            return documentSetsRepository.getAllDocumentSets()
+        }
     }
-}

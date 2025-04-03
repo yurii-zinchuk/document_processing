@@ -21,11 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.scandoc.presentation.screens.details.components.toolbar.MainToolbar
 import com.example.scandoc.presentation.screens.main.components.dialogs.ChooseImageSourceDialog
+import com.example.scandoc.presentation.screens.main.components.dialogs.SetNameDialog
 import com.example.scandoc.presentation.screens.main.components.pages.DocumentSetsPage
 import com.example.scandoc.presentation.screens.main.components.pages.EmptyPage
-import com.example.scandoc.presentation.screens.main.components.dialogs.SetNameDialog
+import com.example.scandoc.presentation.screens.main.components.toolbar.MainToolbar
 
 private const val IMAGE_MIME_TYPE = "image/*"
 
@@ -35,34 +35,38 @@ fun MainScreen(
     vm: MainScreenVM,
     navController: NavHostController,
 ) {
-    val galleryImagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia()
-    ) { uris ->
-        uris
-            .takeIf { it.isNotEmpty() }
-            ?.let { vm.onImagesSelected(it) }
-            ?: return@rememberLauncherForActivityResult
-    }
-    val filesImagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenMultipleDocuments()
-    ) { uris ->
-        uris
-            .takeIf { it.isNotEmpty() }
-            ?.let { vm.onImagesSelected(it) }
-            ?: return@rememberLauncherForActivityResult
-    }
-    val directoryImagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        uri
-            .takeIf { it != null }
-            ?.let { vm.onImagesSelected(it) }
-            ?: return@rememberLauncherForActivityResult
-    }
+    val galleryImagePicker =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.PickMultipleVisualMedia(),
+        ) { uris ->
+            uris
+                .takeIf { it.isNotEmpty() }
+                ?.let { vm.onImagesSelected(it) }
+                ?: return@rememberLauncherForActivityResult
+        }
+    val filesImagePicker =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenMultipleDocuments(),
+        ) { uris ->
+            uris
+                .takeIf { it.isNotEmpty() }
+                ?.let { vm.onImagesSelected(it) }
+                ?: return@rememberLauncherForActivityResult
+        }
+    val directoryImagePicker =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            uri
+                .takeIf { it != null }
+                ?.let { vm.onImagesSelected(it) }
+                ?: return@rememberLauncherForActivityResult
+        }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         val documentSets = vm.documentSets.collectAsLazyPagingItems()
         Column {
@@ -74,17 +78,18 @@ fun MainScreen(
                 DocumentSetsPage(
                     documentSets = documentSets,
                     navController = navController,
-                    onDeleteDocumentSet = vm::onDeleteDocumentSet
+                    onDeleteDocumentSet = vm::onDeleteDocumentSet,
                 )
             }
         }
         if (documentSets.itemCount != 0) {
             FloatingActionButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .navigationBarsPadding()
-                    .padding(end = 16.dp),
-                onClick = vm::onAddDocumentSet
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(end = 16.dp),
+                onClick = vm::onAddDocumentSet,
             ) {
                 Icon(Icons.Filled.Add, null)
             }

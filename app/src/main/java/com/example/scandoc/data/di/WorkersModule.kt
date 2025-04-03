@@ -11,7 +11,5 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class WorkersModule {
     @Binds
-    abstract fun bindWorkerFactory(
-        factory: HiltWorkerFactory
-    ): WorkerFactory
+    abstract fun bindWorkerFactory(factory: HiltWorkerFactory): WorkerFactory
 }

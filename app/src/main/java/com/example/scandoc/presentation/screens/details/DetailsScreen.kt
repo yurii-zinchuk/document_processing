@@ -9,10 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import com.example.scandoc.presentation.screens.details.components.tabs.TabEntities
-import com.example.scandoc.presentation.screens.details.components.tabs.TabPhotos
 import com.example.scandoc.presentation.screens.details.components.tab_selector.Tab
 import com.example.scandoc.presentation.screens.details.components.tab_selector.TabSelector
+import com.example.scandoc.presentation.screens.details.components.tabs.TabEntities
+import com.example.scandoc.presentation.screens.details.components.tabs.TabPhotos
 import com.example.scandoc.presentation.screens.details.components.tabs.TabText
 import com.example.scandoc.presentation.screens.details.components.toolbar.DetailsToolbar
 import kotlinx.coroutines.launch
@@ -21,11 +21,12 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 fun DetailsScreen(
     vm: DetailsScreenVM,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         val scope = rememberCoroutineScope()
         val pagerState = rememberPagerState { Tab.entries.size }
@@ -34,19 +35,19 @@ fun DetailsScreen(
             title = vm.title.value,
             isProcessing = vm.isProcessing.value,
             onProcess = vm::onProcessDocumentSet,
-            onStopProcessing = vm::onStopProcessingDocumentSet
+            onStopProcessing = vm::onStopProcessingDocumentSet,
         )
         TabSelector(pagerState.currentPage) {
             scope.launch {
                 pagerState.animateScrollToPage(
-                    Tab.entries.indexOf(it)
+                    Tab.entries.indexOf(it),
                 )
             }
         }
         HorizontalPager(
             modifier =
-            Modifier
-                .fillMaxSize(),
+                Modifier
+                    .fillMaxSize(),
             state = pagerState,
         ) {
             Tab.entries[it].let { tab ->

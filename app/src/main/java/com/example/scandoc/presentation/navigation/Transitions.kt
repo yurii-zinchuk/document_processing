@@ -15,9 +15,9 @@ val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> Ent
         animationSpec = tween(ANIMATION_DURATION, easing = LinearEasing),
         towards = AnimatedContentTransitionScope.SlideDirection.Start,
     ) +
-            fadeIn(
-                animationSpec = tween(ANIMATION_DURATION, easing = LinearEasing),
-            )
+        fadeIn(
+            animationSpec = tween(ANIMATION_DURATION, easing = LinearEasing),
+        )
 }
 
 val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {

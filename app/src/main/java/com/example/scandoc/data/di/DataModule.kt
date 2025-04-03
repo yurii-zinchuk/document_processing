@@ -9,7 +9,7 @@ import dagger.hilt.components.SingletonComponent
         MappersModule::class,
         RepositoriesModule::class,
         RoomModule::class,
-    ]
+    ],
 )
 @InstallIn(SingletonComponent::class)
 class DataModule

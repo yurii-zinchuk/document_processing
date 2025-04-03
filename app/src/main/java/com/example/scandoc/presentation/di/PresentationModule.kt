@@ -13,7 +13,5 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class PresentationModule {
     @Binds
-    abstract fun bindMapperDocumentSetDomainToUI(
-        mapper: MapperDocumentSetDomainToUI,
-    ): SuspendDataMapper<DocumentSet, DocumentSetItemData>
+    abstract fun bindMapperDocumentSetDomainToUI(mapper: MapperDocumentSetDomainToUI): SuspendDataMapper<DocumentSet, DocumentSetItemData>
 }

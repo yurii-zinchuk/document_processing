@@ -16,9 +16,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     internal companion object {
         @Singleton
-        fun getInstance(
-            context: Context,
-        ): AppDatabase =
+        fun getInstance(context: Context): AppDatabase =
             Room
                 .databaseBuilder(
                     context,

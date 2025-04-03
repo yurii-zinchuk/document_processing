@@ -22,87 +22,90 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailsScreenVM @Inject constructor(
-    private val getDocumentSetImagesUseCase: GetDocumentSetImagesUseCase,
-    private val processDocumentSetUseCase: ProcessDocumentSetUseCase,
-    private val getProcessedDataUseCase: GetProcessedDataUseCase,
-    private val getDocumentSetWorkInfoUseCase: GetDocumentSetWorkInfoUseCase,
-    private val cancelProcessingWorkUseCase: CancelProcessingWorkUseCase,
-    private val getDocumentSetByUUIDUseCase: GetDocumentSetByUUIDUseCase,
-) : ViewModel() {
-    private lateinit var documentSetUUID: UUID
+class DetailsScreenVM
+    @Inject
+    constructor(
+        private val getDocumentSetImagesUseCase: GetDocumentSetImagesUseCase,
+        private val processDocumentSetUseCase: ProcessDocumentSetUseCase,
+        private val getProcessedDataUseCase: GetProcessedDataUseCase,
+        private val getDocumentSetWorkInfoUseCase: GetDocumentSetWorkInfoUseCase,
+        private val cancelProcessingWorkUseCase: CancelProcessingWorkUseCase,
+        private val getDocumentSetByUUIDUseCase: GetDocumentSetByUUIDUseCase,
+    ) : ViewModel() {
+        private lateinit var documentSetUUID: UUID
 
-    // State private
-    private val _isProcessing = mutableStateOf(false)
-    private val _photos = mutableStateOf<List<File>>(emptyList())
-    private val _text = mutableStateOf<String?>(null)
-    private val _entities = mutableStateOf<List<String>?>(null)
-    private val _title = mutableStateOf(EMPTY_STRING)
+        // State private
+        private val _isProcessing = mutableStateOf(false)
+        private val _photos = mutableStateOf<List<File>>(emptyList())
+        private val _text = mutableStateOf<String?>(null)
+        private val _entities = mutableStateOf<List<String>?>(null)
+        private val _title = mutableStateOf(EMPTY_STRING)
 
-    // State public
-    val isProcessing = _isProcessing as State<Boolean>
-    val photos = _photos as State<List<File>>
-    val text = _text as State<String?>
-    val entities = _entities as State<List<String>?>
-    val title = _title as State<String>
+        // State public
+        val isProcessing = _isProcessing as State<Boolean>
+        val photos = _photos as State<List<File>>
+        val text = _text as State<String?>
+        val entities = _entities as State<List<String>?>
+        val title = _title as State<String>
 
-    fun init(uuid: UUID) = viewModelScope.launch(Dispatchers.IO) {
-        documentSetUUID = uuid
+        fun init(uuid: UUID) =
+            viewModelScope.launch(Dispatchers.IO) {
+                documentSetUUID = uuid
 
-        observeProcessingWork(uuid)
-        initDocumentSetData()
-    }
-
-    fun onProcessDocumentSet() = viewModelScope.launch(Dispatchers.IO) {
-        documentSetUUID.let {
-            _isProcessing.value = true
-            try {
-                processDocumentSetUseCase.execute(it)
-            } catch (_: Exception) {
-                /* no-op */
+                observeProcessingWork(uuid)
+                initDocumentSetData()
             }
-            observeProcessingWork(documentSetUUID)
+
+        fun onProcessDocumentSet() =
+            viewModelScope.launch(Dispatchers.IO) {
+                documentSetUUID.let {
+                    _isProcessing.value = true
+                    try {
+                        processDocumentSetUseCase.execute(it)
+                    } catch (_: Exception) {
+                        // no-op
+                    }
+                    observeProcessingWork(documentSetUUID)
+                }
+            }
+
+        fun onStopProcessingDocumentSet() =
+            viewModelScope.launch(Dispatchers.IO) {
+                documentSetUUID
+                    .let { cancelProcessingWorkUseCase.execute(it) }
+                    .let { _isProcessing.value = false }
+            }
+
+        private fun observeProcessingWork(uuid: UUID) {
+            getDocumentSetWorkInfoUseCase.execute(uuid)
+                .mapNotNull { infos -> infos.firstOrNull() }
+                .onEach {
+                    if (it.state.isFinished) {
+                        onProcessingFinished(uuid)
+                    } else {
+                        onProcessingRunning()
+                    }
+                }
+                .launchIn(viewModelScope)
+        }
+
+        private suspend fun initDocumentSetData() {
+            getDocumentSetByUUIDUseCase.execute(documentSetUUID)
+                .let { _title.value = it.name }
+            getDocumentSetImagesUseCase.execute(documentSetUUID)
+                .let { _photos.value = it }
+        }
+
+        private fun onProcessingFinished(uuid: UUID) {
+            _isProcessing.value = false
+            getProcessedDataUseCase.execute(uuid)
+                .let {
+                    _text.value = it.text
+                    _entities.value = it.entities
+                }
+        }
+
+        private fun onProcessingRunning() {
+            _isProcessing.value = true
         }
     }
-
-    fun onStopProcessingDocumentSet() = viewModelScope.launch(Dispatchers.IO) {
-        documentSetUUID
-            .let { cancelProcessingWorkUseCase.execute(it) }
-            .let { _isProcessing.value = false }
-    }
-
-    private fun observeProcessingWork(uuid: UUID) {
-        getDocumentSetWorkInfoUseCase.execute(uuid)
-            .mapNotNull { infos -> infos.firstOrNull() }
-            .onEach {
-                if (it.state.isFinished) {
-                    onProcessingFinished(uuid)
-                } else {
-                    onProcessingRunning()
-                }
-
-            }
-            .launchIn(viewModelScope)
-    }
-
-    private suspend fun initDocumentSetData() {
-        getDocumentSetByUUIDUseCase.execute(documentSetUUID)
-            .let { _title.value = it.name }
-        getDocumentSetImagesUseCase.execute(documentSetUUID)
-            .let { _photos.value = it }
-    }
-
-    private fun onProcessingFinished(uuid: UUID) {
-        _isProcessing.value = false
-        getProcessedDataUseCase.execute(uuid)
-            .let {
-                _text.value = it.text
-                _entities.value = it.entities
-            }
-    }
-
-    private fun onProcessingRunning() {
-        _isProcessing.value = true
-    }
-
-}
