@@ -11,10 +11,10 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.example.scandoc.data.network.api.ProcessingApi
-import com.example.scandoc.data.network.mappers.MapperFileToMultipart
+import com.example.scandoc.data.network.mappers.MapperFileToRequestBody
 import com.example.scandoc.data.network.mappers.MapperProcessingResultResponseToDomain
+import com.example.scandoc.data.network.models.CreateTaskResponse
 import com.example.scandoc.data.network.models.TaskStatusResponse
-import com.example.scandoc.data.network.models.UploadPDFResponse
 import com.example.scandoc.data.room.AppDatabase
 import com.example.scandoc.data.storage.InternalStorage
 import com.example.scandoc.data.workers.ProcessingNotificationManager.Companion.PROGRESS_NOTIFICATION_ID
@@ -33,7 +33,7 @@ class ProcessingWorker
         @Assisted private val context: Context,
         @Assisted workerParameters: WorkerParameters,
         private val mapperProcessingResultResponseToDomain: MapperProcessingResultResponseToDomain,
-        private val mapperFileToMultipart: MapperFileToMultipart,
+        private val mapperFileToRequestBody: MapperFileToRequestBody,
         private val processingApi: ProcessingApi,
         private val internalStorage: InternalStorage,
         private val notificationManager: ProcessingNotificationManager,
@@ -50,8 +50,13 @@ class ProcessingWorker
                 setForeground(getForegroundInfo())
 
                 val pdfFile = unwrapWorkData(inputData).file
-                val uploadResponse = uploadPDFFile(pdfFile)
-                val taskId = uploadResponse.taskId
+                val taskResponse = createProcessingTask()
+                val (taskId, uploadURL) = taskResponse.run { taskId to uploadURL }
+
+                uploadPDFFile(
+                    url = uploadURL,
+                    file = pdfFile,
+                )
 
                 repeat(POLLING_RETRIES) {
                     delay(POLLING_DELAY)
@@ -88,9 +93,18 @@ class ProcessingWorker
                 )
             }
 
-        private suspend fun uploadPDFFile(file: File): UploadPDFResponse {
-            return mapperFileToMultipart.map(file)
-                .let { processingApi.uploadPdf(it) }
+        private suspend fun uploadPDFFile(
+            url: String,
+            file: File,
+        ) {
+            mapperFileToRequestBody.map(file)
+                .let { processingApi.uploadPdfFile(url, it) }
+                .also { if (!it.isSuccessful) onProcessingFailed() }
+        }
+
+        private suspend fun createProcessingTask(): CreateTaskResponse {
+            return processingApi
+                .getTaskInfo()
                 .also { if (!it.isSuccessful) onProcessingFailed() }
                 .body()
                 ?: onProcessingFailed()

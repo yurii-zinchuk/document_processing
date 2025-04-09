@@ -1,6 +1,6 @@
 package com.example.scandoc.data.di
 
-import com.example.scandoc.data.network.mappers.MapperFileToMultipart
+import com.example.scandoc.data.network.mappers.MapperFileToRequestBody
 import com.example.scandoc.data.network.mappers.MapperProcessingResultResponseToDomain
 import com.example.scandoc.data.network.models.ProcessingResultResponse
 import com.example.scandoc.data.room.mappers.MapperDocumentSetDomainToRoom
@@ -13,7 +13,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import java.io.File
 
 @Module
@@ -26,7 +26,7 @@ abstract class MappersModule {
     abstract fun bindMapperDocumentSetDomainToRoom(mapper: MapperDocumentSetDomainToRoom): DataMapper<DocumentSet, RoomDocumentSet>
 
     @Binds
-    abstract fun bindMapperFileToMultipart(mapper: MapperFileToMultipart): DataMapper<File, MultipartBody.Part>
+    abstract fun bindMapperFileToMultipart(mapper: MapperFileToRequestBody): DataMapper<File, RequestBody>
 
     @Binds
     abstract fun bindMapperProcessingResultResponseToDomain(

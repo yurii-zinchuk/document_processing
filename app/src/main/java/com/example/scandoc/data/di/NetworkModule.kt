@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 private const val CONNECT_TIMEOUT = 20L
 private const val WRITE_TIMEOUT = 20L
-private const val READ_TIMEOUT = 0L // No timeout for now
+private const val READ_TIMEOUT = 30L
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -38,7 +38,7 @@ class NetworkModule {
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
         Retrofit
             .Builder()
-            .baseUrl("http://10.0.2.2:8000/")
+            .baseUrl("https://igqdf375ce.execute-api.us-east-1.amazonaws.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

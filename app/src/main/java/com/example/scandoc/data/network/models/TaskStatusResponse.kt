@@ -15,6 +15,9 @@ data class TaskStatusResponse(
         @SerializedName("error")
         ERROR,
 
+        @SerializedName("waiting")
+        WAITING,
+
         @SerializedName("processing")
         PROCESSING,
     }
