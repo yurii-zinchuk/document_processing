@@ -15,9 +15,9 @@ interface ProcessingApi {
     suspend fun getTaskInfo(): Response<CreateTaskResponse>
 
     @PUT
-    suspend fun uploadPdfFile(
+    suspend fun uploadZIPFile(
         @Url presignedUrl: String,
-        @Body pdfFile: RequestBody,
+        @Body zipFile: RequestBody,
     ): Response<Unit>
 
     @GET("/tasks/{taskId}/status")

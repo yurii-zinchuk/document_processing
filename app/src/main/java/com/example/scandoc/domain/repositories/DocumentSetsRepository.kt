@@ -17,7 +17,7 @@ interface DocumentSetsRepository {
 
     suspend fun processDocumentSet(
         uuid: UUID,
-        pdfFile: File,
+        zipFile: File,
     ): UUID
 
     fun getAllDocumentSets(): Flow<PagingData<DocumentSet>>

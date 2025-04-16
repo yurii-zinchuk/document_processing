@@ -1,18 +1,18 @@
 package com.example.scandoc.domain.usecases
 
 import com.example.scandoc.domain.repositories.ImagesRepository
-import com.example.scandoc.domain.repositories.PDFRepository
+import com.example.scandoc.domain.repositories.ZIPRepository
 import java.util.UUID
 import javax.inject.Inject
 
-class CreatePDFUseCase
+class CreateZIPUseCase
     @Inject
     constructor(
         private val imagesRepository: ImagesRepository,
-        private val pdfRepository: PDFRepository,
+        private val ZIPRepository: ZIPRepository,
     ) {
         suspend fun execute(uuid: UUID) {
             val imageFiles = imagesRepository.getImages(uuid)
-            pdfRepository.createPDF(uuid, imageFiles)
+            ZIPRepository.createZIP(uuid, imageFiles)
         }
     }

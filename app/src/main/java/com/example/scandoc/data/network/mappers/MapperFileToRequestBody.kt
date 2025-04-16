@@ -11,10 +11,10 @@ class MapperFileToRequestBody
     @Inject
     constructor() : DataMapper<File, RequestBody> {
         override fun map(data: File): RequestBody {
-            return data.asRequestBody(PDF_MIME_TYPE.toMediaTypeOrNull())
+            return data.asRequestBody(ZIP_MIME_TYPE.toMediaTypeOrNull())
         }
 
         private companion object {
-            private const val PDF_MIME_TYPE = "application/pdf"
+            private const val ZIP_MIME_TYPE = "application/zip"
         }
     }

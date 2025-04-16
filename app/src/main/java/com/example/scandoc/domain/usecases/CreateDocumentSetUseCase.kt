@@ -4,7 +4,7 @@ import android.net.Uri
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.repositories.DocumentSetsRepository
 import com.example.scandoc.domain.repositories.ImagesRepository
-import com.example.scandoc.domain.repositories.PDFRepository
+import com.example.scandoc.domain.repositories.ZIPRepository
 import java.util.UUID
 import javax.inject.Inject
 
@@ -13,7 +13,7 @@ class CreateDocumentSetUseCase
     constructor(
         private val imagesRepository: ImagesRepository,
         private val documentSetsRepository: DocumentSetsRepository,
-        private val pdfRepository: PDFRepository,
+        private val ZIPRepository: ZIPRepository,
     ) {
         suspend fun execute(
             uris: List<Uri>,
@@ -30,6 +30,6 @@ class CreateDocumentSetUseCase
                 ),
             )
             val imageFiles = imagesRepository.getImages(uuid)
-            pdfRepository.createPDF(uuid, imageFiles)
+            ZIPRepository.createZIP(uuid, imageFiles)
         }
     }

@@ -2,10 +2,10 @@ package com.example.scandoc.data.di
 
 import com.example.scandoc.data.repositories.DocumentSetsRepositoryImpl
 import com.example.scandoc.data.repositories.ImagesRepositoryImpl
-import com.example.scandoc.data.repositories.PDFRepositoryImpl
+import com.example.scandoc.data.repositories.ZIPRepositoryImpl
 import com.example.scandoc.domain.repositories.DocumentSetsRepository
 import com.example.scandoc.domain.repositories.ImagesRepository
-import com.example.scandoc.domain.repositories.PDFRepository
+import com.example.scandoc.domain.repositories.ZIPRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,5 +21,5 @@ abstract class RepositoriesModule {
     abstract fun bindDocumentSetsRepository(repositoryImpl: DocumentSetsRepositoryImpl): DocumentSetsRepository
 
     @Binds
-    abstract fun bindPDFRepository(repositoryImpl: PDFRepositoryImpl): PDFRepository
+    abstract fun bindZIPRepository(repositoryImpl: ZIPRepositoryImpl): ZIPRepository
 }

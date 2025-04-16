@@ -20,6 +20,7 @@ import com.example.scandoc.data.storage.InternalStorage
 import com.example.scandoc.data.workers.ProcessingNotificationManager.Companion.PROGRESS_NOTIFICATION_ID
 import com.example.scandoc.domain.models.ProcessedData
 import com.example.scandoc.utils.noop
+import com.google.gson.Gson
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
@@ -49,13 +50,13 @@ class ProcessingWorker
                 notificationManager.createNotificationChannel()
                 setForeground(getForegroundInfo())
 
-                val pdfFile = unwrapWorkData(inputData).file
+                val zipFile = unwrapWorkData(inputData).file
                 val taskResponse = createProcessingTask()
                 val (taskId, uploadURL) = taskResponse.run { taskId to uploadURL }
 
-                uploadPDFFile(
+                uploadZIPFile(
                     url = uploadURL,
-                    file = pdfFile,
+                    file = zipFile,
                 )
 
                 repeat(POLLING_RETRIES) {
@@ -93,12 +94,12 @@ class ProcessingWorker
                 )
             }
 
-        private suspend fun uploadPDFFile(
+        private suspend fun uploadZIPFile(
             url: String,
             file: File,
         ) {
             mapperFileToRequestBody.map(file)
-                .let { processingApi.uploadPdfFile(url, it) }
+                .let { processingApi.uploadZIPFile(url, it) }
                 .also { if (!it.isSuccessful) onProcessingFailed() }
         }
 
@@ -139,7 +140,7 @@ class ProcessingWorker
                         .takeIf { it.exists() }
                         ?.writeText(text)
                 }
-                entities?.joinToString(ENTITIES_SEPARATOR)?.let { entitiesText ->
+                Gson().toJson(entities)?.let { entitiesText ->
                     getProcessedEntitiesFile(uuid)
                         .also { if (!it.exists()) it.createNewFile() }
                         .takeIf { it.exists() }
@@ -187,23 +188,22 @@ class ProcessingWorker
         }
 
         companion object {
-            private const val FILE_KEY = "PDF_FILE_NAME"
+            private const val FILE_KEY = "ZIP_FILE_NAME"
             private const val UUID_KEY = "UUID_STRING"
 
             private const val PROCESSED_TEXT_FILE_NAME = "text.txt"
             private const val PROCESSED_ENTITIES_FILE_NAME = "entities.txt"
             private const val PROCESSED_DATA_DIRECTORY = "processed"
-            private const val ENTITIES_SEPARATOR = "\n"
 
             private const val POLLING_RETRIES = 300
             private const val POLLING_DELAY = 10_000L
 
             fun wrapWorkData(
-                pdfFilePath: File,
+                zipFilePath: File,
                 documentSetUUID: UUID,
             ): Data =
                 workDataOf(
-                    FILE_KEY to pdfFilePath.absolutePath,
+                    FILE_KEY to zipFilePath.absolutePath,
                     UUID_KEY to documentSetUUID.toString(),
                 )
 

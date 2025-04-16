@@ -64,6 +64,9 @@ ktlint {
 }
 dependencies {
 
+    // Gson
+    implementation(libs.gson)
+
     // WorkManager
     implementation(libs.work.runtime.ktx)
 

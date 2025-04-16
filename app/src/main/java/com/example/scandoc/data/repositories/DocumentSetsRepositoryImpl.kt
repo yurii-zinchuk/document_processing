@@ -20,6 +20,8 @@ import com.example.scandoc.data.workers.ProcessingWorker.Companion.wrapWorkData
 import com.example.scandoc.domain.models.DocumentSet
 import com.example.scandoc.domain.models.ProcessedData
 import com.example.scandoc.domain.repositories.DocumentSetsRepository
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -57,9 +59,9 @@ class DocumentSetsRepositoryImpl
 
         override suspend fun processDocumentSet(
             uuid: UUID,
-            pdfFile: File,
+            zipFile: File,
         ): UUID {
-            val input = wrapWorkData(pdfFile, uuid)
+            val input = wrapWorkData(zipFile, uuid)
             val constraints =
                 Constraints
                     .Builder()
@@ -103,7 +105,7 @@ class DocumentSetsRepositoryImpl
                 getProcessedEntitiesFile(uuid)
                     .takeIf { it.exists() }
                     ?.readText()
-                    ?.split(ENTITIES_SEPARATOR)
+                    ?.let { Gson().fromJson(it, object : TypeToken<Map<String, List<String>>?>() {}) }
 
             return ProcessedData(text, entities)
         }
@@ -138,7 +140,6 @@ class DocumentSetsRepositoryImpl
             private const val PROCESSED_TEXT_FILE_NAME = "text.txt"
             private const val PROCESSED_ENTITIES_FILE_NAME = "entities.txt"
             private const val PROCESSED_DATA_DIRECTORY = "processed"
-            private const val ENTITIES_SEPARATOR = "\n"
             private const val PHOTOS_PAGE_SIZE = 20
         }
     }

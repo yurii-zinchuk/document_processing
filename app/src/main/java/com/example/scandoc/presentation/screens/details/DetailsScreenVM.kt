@@ -38,14 +38,14 @@ class DetailsScreenVM
         private val _isProcessing = mutableStateOf(false)
         private val _photos = mutableStateOf<List<File>>(emptyList())
         private val _text = mutableStateOf<String?>(null)
-        private val _entities = mutableStateOf<List<String>?>(null)
+        private val _entities = mutableStateOf<Map<String, List<String>>?>(null)
         private val _title = mutableStateOf(EMPTY_STRING)
 
         // State public
         val isProcessing = _isProcessing as State<Boolean>
         val photos = _photos as State<List<File>>
         val text = _text as State<String?>
-        val entities = _entities as State<List<String>?>
+        val entities = _entities as State<Map<String, List<String>>?>
         val title = _title as State<String>
 
         fun init(uuid: UUID) =
