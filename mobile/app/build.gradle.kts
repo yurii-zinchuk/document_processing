@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.scandoc"
+    namespace = "com.zinchuk.scandoc"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.scandoc"
+        applicationId = "com.zinchuk.scandoc"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -24,8 +24,10 @@ android {
     }
 
     buildTypes {
+        debug {  }
         release {
             isMinifyEnabled = false
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
