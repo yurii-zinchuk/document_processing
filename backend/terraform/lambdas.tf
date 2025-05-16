@@ -37,7 +37,7 @@ resource "aws_lambda_function" "process_file" {
   role          = aws_iam_role.lambda_exec.arn
   package_type  = "Image"
 
-  image_uri     = "${aws_ecr_repository.ocr_lambda.repository_url}@sha256:f70492cf3baefeb98cdf7f3a2f86519666f188f6b56981c9b15693ef46cc4276"
+  image_uri     = "${aws_ecr_repository.ocr_lambda.repository_url}@sha256:8083b6bbc98a0c32a5c75caa82fcc6f8fe65cd914bd93b3d7954322f2e05d76c"
 
   timeout       = 30 # seconds
 

@@ -96,7 +96,7 @@ def extract_entities_from_text(text: str) -> list:
 
             The documents may include formal and legal or ancient language, personal names, addresses, dates, and government institutions.
 
-            Your task is to extract entities from the text and return a clean JSON object in this format:
+            Your task is to extract entities from the text and return a clean JSON object exactly matching the following schema:
 
             {{
             "people": [],
@@ -112,6 +112,7 @@ def extract_entities_from_text(text: str) -> list:
             - Preserve original spelling in Cyrillic (do not translate).
             - Correct misspellings.
             - Above categories are examples; you can add more or less categories if needed.
+            - All field values must be flat lists of strings.
 
             Text:
             {text}
