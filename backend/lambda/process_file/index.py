@@ -4,6 +4,7 @@ import json
 import io
 import zipfile
 import base64
+import re
 from urllib.parse import unquote_plus
 from google.cloud import vision
 
@@ -96,22 +97,30 @@ def extract_entities_from_text(text: str) -> list:
 
             The documents may include formal and legal or ancient language, personal names, addresses, dates, and government institutions.
 
-            Your task is to extract entities from the text and return a clean JSON object exactly matching the following schema:
+            Your task is to extract entities from the text and return a clean valid JSON object exactly matching the following schema:
 
             {{
-            "people": [],
-            "organizations": [],
-            "locations": [],
-            "dates": [],
-            etc...
+                "people": [],
+                "organizations": [],
+                "locations": [],
+                "dates": [],
+                etc...
             }}
 
-            💡 Notes:
+            IMPORTANT:
+            - The JSON object must be valid with correct structure and syntax following the schema above.
+            - All field values must be flat **lists of strings**.
+            - Each key must use **double quotes**.
+            - Do not use nested objects — every value must be a flat list.
+            - Do **not** truncate output. Make sure the JSON is fully closed (matching {{ and }} and all brackets).
+            - The output must be **pure JSON only** — do not include any explanations, markdown, or commentary.
+
+            Notes:
+            - Respond only with a valid JSON object.
             - Do not include explanations or comments.
-            - Respond only with the JSON object.
             - Preserve original spelling in Cyrillic (do not translate).
             - Correct misspellings.
-            - Above categories are examples; you can add more or less categories if needed.
+            - Above categories are examples; you can add more or fewer categories if needed.
             - All field values must be flat lists of strings.
 
             Text:
@@ -143,4 +152,20 @@ def extract_entities_from_text(text: str) -> list:
     except json.JSONDecodeError:
         print("[WARN] Failed to decode Claude JSON response:")
         print(message_text)
-        return []
+
+        # Attempt to recover by truncating at the last closing list bracket and appending a closing brace
+        last_list_close = message_text.rfind(']')
+        if last_list_close != -1:
+            truncated = message_text[:last_list_close + 1]
+            # Remove trailing comma if it exists
+            truncated = re.sub(r',\s*$', '', truncated)
+            fixed_json = truncated + '\n}'
+
+            try:
+                return json.loads(fixed_json)
+            except json.JSONDecodeError:
+                print("[ERROR] Failed to recover JSON after truncation.")
+                return []
+        else:
+            print("[ERROR] Could not find a closing list bracket `]` to attempt JSON fix.")
+            return []
